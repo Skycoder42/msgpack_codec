@@ -1,4 +1,4 @@
-part of msgpack_dart;
+part of '../msgpack_dart.dart';
 
 abstract class ExtDecoder {
   dynamic decodeObject(int extType, Uint8List data);
@@ -6,7 +6,7 @@ abstract class ExtDecoder {
 
 class Deserializer {
   final ExtDecoder? _extDecoder;
-  final codec = Utf8Codec();
+  final codec = const Utf8Codec();
   final Uint8List _list;
   final ByteData _data;
   int _offset = 0;
@@ -104,17 +104,13 @@ class Deserializer {
       case 0xc9:
         return _readExt(_readUInt32());
       default:
-        throw FormatError("Invalid MessagePack format");
+        throw FormatError('Invalid MessagePack format');
     }
   }
 
-  int _readInt8() {
-    return _data.getInt8(_offset++);
-  }
+  int _readInt8() => _data.getInt8(_offset++);
 
-  int _readUInt8() {
-    return _data.getUint8(_offset++);
-  }
+  int _readUInt8() => _data.getUint8(_offset++);
 
   int _readUInt16() {
     final res = _data.getUint16(_offset);
@@ -174,7 +170,7 @@ class Deserializer {
   String _readString(int length) {
     final list = _readBuffer(length);
     final len = list.length;
-    for (int i = 0; i < len; ++i) {
+    for (var i = 0; i < len; ++i) {
       if (list[i] > 127) {
         return codec.decode(list);
       }
@@ -182,19 +178,20 @@ class Deserializer {
     return String.fromCharCodes(list);
   }
 
-  List _readArray(int length) {
-    final res = List<dynamic>.filled(length, null, growable: false);
-    for (int i = 0; i < length; ++i) {
+  List<dynamic> _readArray(int length) {
+    final res = List<dynamic>.filled(length, null);
+    for (var i = 0; i < length; ++i) {
       res[i] = decode();
     }
     return res;
   }
 
-  Map _readMap(int length) {
-    final res = Map();
-    while (length > 0) {
+  Map<dynamic, dynamic> _readMap(int length) {
+    final res = <dynamic, dynamic>{};
+    var remainingLength = length;
+    while (remainingLength > 0) {
       res[decode()] = decode();
-      --length;
+      --remainingLength;
     }
     return res;
   }

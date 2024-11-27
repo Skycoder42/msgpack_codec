@@ -1,0 +1,12 @@
+include: package:dart_test_tools/package.yaml
+
+linter:
+  rules:
+    cascade_invocations: false
+    public_member_api_docs: false
+    prefer_foreach: false
+
+custom_lint:
+  rules:
+    - no_self_package_imports: false
+    - src_library_not_exported: false

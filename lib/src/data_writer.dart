@@ -1,7 +1,7 @@
-part of msgpack_dart;
+part of '../msgpack_dart.dart';
 
-final int _kScratchSizeInitial = 64;
-final int _kScratchSizeRegular = 1024;
+const int _kScratchSizeInitial = 64;
+const int _kScratchSizeRegular = 1024;
 
 class DataWriter {
   Uint8List? _scratchBuffer;
@@ -84,9 +84,12 @@ class DataWriter {
       // be 0
       if (bytes is Uint8List) {
         _scratchBuffer?.setRange(
-            _scratchOffset, _scratchOffset + length, bytes);
+          _scratchOffset,
+          _scratchOffset + length,
+          bytes,
+        );
       } else {
-        for (int i = 0; i < length; i++) {
+        for (var i = 0; i < length; i++) {
           _scratchBuffer?[_scratchOffset + i] = bytes[i];
         }
       }
@@ -130,14 +133,18 @@ class DataWriter {
       if (_builder.isEmpty) {
         // We're still on small scratch buffer, move it to _builder
         // and create regular one
-        _builder.add(Uint8List.view(
-          _scratchBuffer!.buffer,
-          _scratchBuffer!.offsetInBytes,
-          _scratchOffset,
-        ));
+        _builder.add(
+          Uint8List.view(
+            _scratchBuffer!.buffer,
+            _scratchBuffer!.offsetInBytes,
+            _scratchOffset,
+          ),
+        );
         _scratchBuffer = Uint8List(_kScratchSizeRegular);
         _scratchData = ByteData.view(
-            _scratchBuffer!.buffer, _scratchBuffer!.offsetInBytes);
+          _scratchBuffer!.buffer,
+          _scratchBuffer!.offsetInBytes,
+        );
       } else {
         _builder.add(
           Uint8List.fromList(
