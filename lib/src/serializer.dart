@@ -1,4 +1,8 @@
-part of '../msgpack_dart.dart';
+import 'dart:convert';
+import 'dart:typed_data';
+
+import 'common.dart';
+import 'data_writer.dart';
 
 abstract class ExtEncoder {
   // Return null if object can't be encoded

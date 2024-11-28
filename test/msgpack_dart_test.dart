@@ -3,7 +3,10 @@
 import 'dart:typed_data';
 
 import 'package:msgpack_dart/msgpack_dart.dart';
+import 'package:msgpack_dart/src/serializer.dart';
 import 'package:test/test.dart';
+
+import 'test_utils.dart' if (dart.library.js_interop) 'test_utils_js.dart';
 
 //
 // Tests taken from msgpack2 (https://github.com/butlermatt/msgpack2)
@@ -175,8 +178,11 @@ void packUint32() {
 }
 
 void packUint64() {
-  final List<int> encoded = serialize(9223372036854775807);
-  expect(encoded, orderedEquals([207, 127, 255, 255, 255, 255, 255, 255, 255]));
+  final List<int> encoded = serialize(uint64TestValue);
+  expect(
+    encoded,
+    orderedEquals(uint64Packed),
+  );
 }
 
 void packInt8() {
@@ -195,8 +201,8 @@ void packInt32() {
 }
 
 void packInt64() {
-  final List<int> encoded = serialize(-9223372036854775808);
-  expect(encoded, orderedEquals([211, 128, 0, 0, 0, 0, 0, 0, 0]));
+  final List<int> encoded = serialize(int64TestValue);
+  expect(encoded, orderedEquals(int64Packed));
 }
 
 void packFloat32() {
@@ -420,11 +426,10 @@ void unpackUint32() {
 
 void unpackUint64() {
   // Dart 2 doesn't support true Uint64 without using BigInt
-  final data =
-      Uint8List.fromList([207, 127, 255, 255, 255, 255, 255, 255, 255]);
+  final data = Uint8List.fromList(uint64Packed);
   final value = deserialize(data);
   expect(value, isInt);
-  expect(value, equals(9223372036854775807));
+  expect(value, equals(uint64TestValue));
 }
 
 void unpackInt8() {
@@ -451,10 +456,10 @@ void unpackInt32() {
 }
 
 void unpackInt64() {
-  final data = Uint8List.fromList([211, 128, 0, 0, 0, 0, 0, 0, 0]);
+  final data = Uint8List.fromList(int64Packed);
   final value = deserialize(data);
   expect(value, isInt);
-  expect(value, equals(-9223372036854775808));
+  expect(value, equals(int64TestValue));
 }
 
 void unpackFloat32() {

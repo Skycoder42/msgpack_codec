@@ -1,12 +1,7 @@
-library;
-
-import 'dart:convert';
 import 'dart:typed_data';
 
-part 'src/common.dart';
-part 'src/data_writer.dart';
-part 'src/deserializer.dart';
-part 'src/serializer.dart';
+import 'src/deserializer.dart';
+import 'src/serializer.dart';
 
 Uint8List serialize(
   dynamic value, {

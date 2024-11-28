@@ -1,4 +1,9 @@
-part of '../msgpack_dart.dart';
+import 'dart:convert';
+import 'dart:typed_data';
+
+import 'byte_data_extensions.dart'
+    if (dart.library.js_interop) 'byte_data_extensions_js.dart';
+import 'common.dart';
 
 abstract class ExtDecoder {
   dynamic decodeObject(int extType, Uint8List data);
@@ -137,13 +142,13 @@ class Deserializer {
   }
 
   int _readUInt64() {
-    final res = _data.getUint64(_offset);
+    final res = _data.getUint64Safe(_offset);
     _offset += 8;
     return res;
   }
 
   int _readInt64() {
-    final res = _data.getInt64(_offset);
+    final res = _data.getInt64Safe(_offset);
     _offset += 8;
     return res;
   }
