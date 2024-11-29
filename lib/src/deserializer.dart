@@ -6,6 +6,7 @@ import 'byte_data_extensions.dart'
 import 'common.dart';
 
 abstract class ExtDecoder {
+  /// Return null if the data cannot be decoded
   dynamic decodeObject(int extType, Uint8List data);
 }
 
@@ -153,6 +154,18 @@ class Deserializer {
     return res;
   }
 
+  BigInt _readBigUInt64() {
+    final res = _data.getBigUint64(_offset);
+    _offset += 8;
+    return res;
+  }
+
+  BigInt _readBigInt64() {
+    final res = _data.getBigInt64(_offset);
+    _offset += 8;
+    return res;
+  }
+
   double _readFloat() {
     final res = _data.getFloat32(_offset);
     _offset += 4;
@@ -201,9 +214,60 @@ class Deserializer {
     return res;
   }
 
-  dynamic _readExt(int length) {
-    final extType = _readUInt8();
+  dynamic _readExt(int length) => switch (_readUInt8()) {
+        0xFF => _readTimestamp(length),
+        final extType => _readCustomExt(extType, length),
+      };
+
+  DateTime _readTimestamp(int length) {
+    int toMicroSecondsSafe(BigInt seconds, BigInt nanoSeconds) {
+      final microSeconds =
+          seconds * BigInt.from(1000000) + nanoSeconds ~/ BigInt.from(1000);
+      if (!microSeconds.isValidInt) {
+        throw FormatError(
+          'timestamp is to big to be safely represented in dart',
+        );
+      }
+      return microSeconds.toInt();
+    }
+
+    switch (length) {
+      case 4:
+        return DateTime.fromMillisecondsSinceEpoch(
+          _readUInt32() * 1000,
+          isUtc: true,
+        );
+      case 8:
+        final value = _readBigUInt64();
+        final nanoSeconds = value >> 34;
+        final seconds = value & BigInt.from(0x00000003ffffffff);
+        return DateTime.fromMicrosecondsSinceEpoch(
+          toMicroSecondsSafe(seconds, nanoSeconds),
+          isUtc: true,
+        );
+      case 12:
+        final nanoSeconds = _readUInt32();
+        final seconds = _readBigInt64();
+        return DateTime.fromMicrosecondsSinceEpoch(
+          toMicroSecondsSafe(seconds, BigInt.from(nanoSeconds)),
+          isUtc: true,
+        );
+      default:
+        return throw FormatError(
+          'Unexpected timestamp length $length. Must be 4, 8 or 12 bytes',
+        );
+    }
+  }
+
+  dynamic _readCustomExt(int extType, int length) {
     final data = _readBuffer(length);
-    return _extDecoder?.decodeObject(extType, data);
+    final decoded = _extDecoder?.decodeObject(extType, data);
+    if (decoded != null) {
+      return decoded;
+    }
+    throw FormatError(
+      "Don't know how to deserialize "
+      '0x${extType.toRadixString(16).padLeft(2, '0')}',
+    );
   }
 }

@@ -59,6 +59,18 @@ class DataWriter {
     scratchOffset += 8;
   }
 
+  void writeBigUint64(BigInt i, [Endian endian = Endian.big]) {
+    ensureSize(8);
+    scratchData?.setBigUint64(scratchOffset, i, endian);
+    scratchOffset += 8;
+  }
+
+  void writeBigInt64(BigInt i, [Endian endian = Endian.big]) {
+    ensureSize(8);
+    scratchData?.setBigInt64(scratchOffset, i, endian);
+    scratchOffset += 8;
+  }
+
   void writeFloat32(double f, [Endian endian = Endian.big]) {
     ensureSize(4);
     scratchData?.setFloat32(scratchOffset, f, endian);

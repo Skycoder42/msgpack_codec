@@ -4,9 +4,9 @@ import 'dart:typed_data';
 import 'common.dart';
 import 'data_writer.dart';
 
-abstract class ExtEncoder {
-  // Return null if object can't be encoded
-  int extTypeForObject(dynamic object);
+abstract interface class ExtEncoder {
+  /// Return null if object can't be encoded
+  int? extTypeForObject(dynamic object);
 
   Uint8List encodeObject(dynamic object);
 }
@@ -21,6 +21,9 @@ class Float {
 }
 
 class Serializer {
+  static final _timestamp96min = DateTime.utc(-292277022657, 1, 27, 8, 29, 52);
+  static final _timestamp96Max = DateTime.utc(292277026596, 12, 4, 15, 30, 8);
+
   final _codec = const Utf8Codec();
   final DataWriter _writer;
   final ExtEncoder? _extEncoder;
@@ -49,6 +52,8 @@ class Serializer {
     if (_extEncoder != null && _writeExt(d)) {
       return;
     }
+    // run built-in extensions AFTER the custom ones
+    if (d is DateTime) return _writeDateTime(d);
     throw FormatError("Don't know how to serialize $d");
   }
 
@@ -175,6 +180,41 @@ class Serializer {
     for (final item in map.entries) {
       encode(item.key);
       encode(item.value);
+    }
+  }
+
+  void _writeDateTime(DateTime dateTime) {
+    if (dateTime.isBefore(_timestamp96min)) {
+      throw FormatError(
+        'DateTime is too far in the past to be serialized with msgpack',
+      );
+    }
+    if (dateTime.isAfter(_timestamp96Max)) {
+      throw FormatError(
+        'DateTime is too far in the future to be serialized with msgpack',
+      );
+    }
+
+    final microSecondsSinceEpoch = dateTime.microsecondsSinceEpoch;
+    final nanoSeconds = (microSecondsSinceEpoch % 1000000) * 1000;
+    final seconds = microSecondsSinceEpoch ~/ 1000000;
+    final bigSeconds = BigInt.from(seconds);
+
+    if (bigSeconds.bitLength > 34) {
+      // value is too big for timestamp64
+      _writer.writeBytes(const [0xc7, 12, 0xff]);
+      _writer.writeUint32(nanoSeconds);
+      _writer.writeInt64(seconds);
+    } else {
+      if (bigSeconds.bitLength > 32 || nanoSeconds != 0) {
+        // value is too big or too precise for timestamp32
+        final bigNanoSeconds = BigInt.from(nanoSeconds);
+        _writer.writeBytes(const [0xd7, 0xff]);
+        _writer.writeBigUint64((bigNanoSeconds << 34) | bigSeconds);
+      } else {
+        _writer.writeBytes(const [0xd6, 0xff]);
+        _writer.writeUint32(seconds);
+      }
     }
   }
 
