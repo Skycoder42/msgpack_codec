@@ -21,9 +21,6 @@ class Float {
 }
 
 class Serializer {
-  static final _timestamp96min = DateTime.utc(-292277022657, 1, 27, 8, 29, 52);
-  static final _timestamp96Max = DateTime.utc(292277026596, 12, 4, 15, 30, 8);
-
   final _codec = const Utf8Codec();
   final DataWriter _writer;
   final ExtEncoder? _extEncoder;
@@ -184,23 +181,12 @@ class Serializer {
   }
 
   void _writeDateTime(DateTime dateTime) {
-    if (dateTime.isBefore(_timestamp96min)) {
-      throw FormatError(
-        'DateTime is too far in the past to be serialized with msgpack',
-      );
-    }
-    if (dateTime.isAfter(_timestamp96Max)) {
-      throw FormatError(
-        'DateTime is too far in the future to be serialized with msgpack',
-      );
-    }
-
     final microSecondsSinceEpoch = dateTime.microsecondsSinceEpoch;
-    final nanoSeconds = (microSecondsSinceEpoch % 1000000) * 1000;
+    final nanoSeconds = (microSecondsSinceEpoch.abs() % 1000000) * 1000;
     final seconds = microSecondsSinceEpoch ~/ 1000000;
     final bigSeconds = BigInt.from(seconds);
 
-    if (bigSeconds.bitLength > 34) {
+    if (seconds < 0 || bigSeconds.bitLength > 34) {
       // value is too big for timestamp64
       _writer.writeBytes(const [0xc7, 12, 0xff]);
       _writer.writeUint32(nanoSeconds);

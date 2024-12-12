@@ -219,11 +219,18 @@ class Deserializer {
         final extType => _readCustomExt(extType, length),
       };
 
+  static final _dateTimeOffsetMicroSecondsMax =
+      // 100000000 * 24 * 60 * 60 * 1000 * 1000
+      BigInt.parse('8640000000000000000');
+
   DateTime _readTimestamp(int length) {
     int toMicroSecondsSafe(BigInt seconds, BigInt nanoSeconds) {
-      final microSeconds =
-          seconds * BigInt.from(1000000) + nanoSeconds ~/ BigInt.from(1000);
-      if (!microSeconds.isValidInt) {
+      final nanoSecondsSigned =
+          seconds.sign < 0 ? nanoSeconds * BigInt.from(-1) : nanoSeconds;
+      final microSeconds = seconds * BigInt.from(1000000) +
+          nanoSecondsSigned ~/ BigInt.from(1000);
+      if (!microSeconds.isValidInt ||
+          microSeconds.abs() > _dateTimeOffsetMicroSecondsMax) {
         throw FormatError(
           'timestamp is to big to be safely represented in dart',
         );
