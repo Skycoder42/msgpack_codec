@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'common.dart';
 import 'data_writer.dart';
+import 'msgpack_timestamp.dart';
 
 abstract interface class ExtEncoder {
   /// Return null if object can't be encoded
@@ -50,7 +51,7 @@ class Serializer {
       return;
     }
     // run built-in extensions AFTER the custom ones
-    if (d is DateTime) return _writeDateTime(d);
+    if (d is MsgpackTimestamp) return _writeTimeStamp(d);
     throw FormatError("Don't know how to serialize $d");
   }
 
@@ -180,26 +181,22 @@ class Serializer {
     }
   }
 
-  void _writeDateTime(DateTime dateTime) {
-    final microSecondsSinceEpoch = dateTime.microsecondsSinceEpoch;
-    final nanoSeconds = (microSecondsSinceEpoch.abs() % 1000000) * 1000;
-    final seconds = microSecondsSinceEpoch ~/ 1000000;
-    final bigSeconds = BigInt.from(seconds);
+  void _writeTimeStamp(MsgpackTimestamp timestamp) {
+    final MsgpackTimestamp(:seconds, :nanoSeconds) = timestamp;
 
-    if (seconds < 0 || bigSeconds.bitLength > 34) {
+    if (seconds < BigInt.zero || seconds.bitLength > 34) {
       // value is too big for timestamp64
       _writer.writeBytes(const [0xc7, 12, 0xff]);
-      _writer.writeUint32(nanoSeconds);
-      _writer.writeInt64(seconds);
+      _writer.writeUint32(nanoSeconds.toInt());
+      _writer.writeBigInt64(seconds);
     } else {
-      if (bigSeconds.bitLength > 32 || nanoSeconds != 0) {
+      if (seconds.bitLength > 32 || nanoSeconds != BigInt.zero) {
         // value is too big or too precise for timestamp32
-        final bigNanoSeconds = BigInt.from(nanoSeconds);
         _writer.writeBytes(const [0xd7, 0xff]);
-        _writer.writeBigUint64((bigNanoSeconds << 34) | bigSeconds);
+        _writer.writeBigUint64((nanoSeconds << 34) | seconds);
       } else {
         _writer.writeBytes(const [0xd6, 0xff]);
-        _writer.writeUint32(seconds);
+        _writer.writeUint32(seconds.toInt());
       }
     }
   }

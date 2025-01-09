@@ -4,9 +4,13 @@ version: 1.0.1
 homepage: https://github.com/knopp/msgpack_dart
 
 environment:
-    sdk: ^3.5.0
+    sdk: ^3.6.0
+
+dependencies:
+    meta: ^1.16.0
 
 dev_dependencies:
-    dart_pre_commit: ^5.4.0
-    dart_test_tools: ^6.0.0
-    test: ^1.25.9
+    collection: ^1.19.1
+    dart_pre_commit: ^5.4.2
+    dart_test_tools: ^6.0.1
+    test: ^1.25.14

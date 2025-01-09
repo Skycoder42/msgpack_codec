@@ -3,7 +3,7 @@
 import 'dart:typed_data';
 
 import 'package:msgpack_dart/msgpack_dart.dart';
-import 'package:msgpack_dart/src/common.dart';
+import 'package:msgpack_dart/src/msgpack_timestamp.dart';
 import 'package:msgpack_dart/src/serializer.dart';
 import 'package:test/test.dart';
 
@@ -346,7 +346,7 @@ void packIntToStringMap() {
 }
 
 void packTimestamp32() {
-  final timestamp = DateTime(2020, 11, 17, 14, 38, 55);
+  final timestamp = MsgpackTimestamp(BigInt.from(1605623935));
   final encoded = serialize(timestamp);
   expect(
     encoded,
@@ -360,7 +360,10 @@ void packTimestamp32() {
 }
 
 void packTimestamp64() {
-  final timestamp = DateTime(2020, 11, 17, 14, 38, 55, 123, 456);
+  final timestamp = MsgpackTimestamp(
+    BigInt.from(1605623935),
+    BigInt.from(123456000),
+  );
   // seconds(34): __00 0101 1111 1011 0011 1110 0000 0111 1111
   // nanoseconds(30): 0001 1101 0110 1111 0010 1000 0000 00__
   final encoded = serialize(timestamp);
@@ -380,7 +383,10 @@ void packTimestamp64() {
 }
 
 void packTimestamp96() {
-  final timestamp = DateTime(1234, 11, 17, 14, 38, 55, 987, 654);
+  final timestamp = MsgpackTimestamp(
+    BigInt.from(-23198174465),
+    BigInt.from(987655321),
+  );
   final encoded = serialize(timestamp);
   expect(
     encoded,
@@ -389,9 +395,9 @@ void packTimestamp96() {
         // header
         0xc7, 12, 0xFF,
         // nanoseconds
-        0x00, 0xBC, 0x62, 0x90,
+        0x3A, 0xDE, 0x6C, 0x99,
         // seconds
-        0xFF, 0xFF, 0xFF, 0xFA, 0x99, 0x47, 0xF3, 0x00,
+        0xFF, 0xFF, 0xFF, 0xFA, 0x99, 0x47, 0xF2, 0xFF,
       ],
     ),
   );
@@ -595,8 +601,8 @@ void unpackTimestamp32() {
   ]);
   final value = deserialize(data);
 
-  expect(value, isA<DateTime>());
-  expect(value, DateTime.utc(2020, 11, 17, 14, 38, 55));
+  expect(value, isA<MsgpackTimestamp>());
+  expect(value, MsgpackTimestamp(BigInt.from(1605623935)));
 }
 
 void unpackTimestamp64() {
@@ -612,8 +618,11 @@ void unpackTimestamp64() {
   ]);
   final value = deserialize(data);
 
-  expect(value, isA<DateTime>());
-  expect(value, DateTime.utc(2020, 11, 17, 14, 38, 55, 123, 456 /*, 789*/));
+  expect(value, isA<MsgpackTimestamp>());
+  expect(
+    value,
+    MsgpackTimestamp(BigInt.from(1605623935), BigInt.from(123456789)),
+  );
 }
 
 void unpackTimestamp96() {
@@ -621,55 +630,15 @@ void unpackTimestamp96() {
     // header
     0xc7, 12, 0xFF,
     // nanoseconds
-    0x00, 0xBC, 0x61, 0x4F,
+    0x3A, 0xDE, 0x6C, 0x99,
     // seconds
-    0xFF, 0xFF, 0xFF, 0xFA, 0x99, 0x47, 0xF3, 0x00,
+    0xFF, 0xFF, 0xFF, 0xFA, 0x99, 0x47, 0xF2, 0xFF,
   ]);
   final value = deserialize(data);
 
-  expect(value, isA<DateTime>());
-  expect(value, DateTime.utc(1234, 11, 17, 14, 38, 55, 987, 655 /*, 321*/));
-
-  // test limits
-  final dataMax = Uint8List.fromList([
-    // header
-    0xc7, 12, 0xFF,
-    // nanoseconds
-    0x00, 0x00, 0x00, 0x00,
-    // seconds
-    0x00, 0x00, 0x07, 0xDB, 0xA8, 0x21, 0x80, 0x00,
-  ]);
-  final valueMax = deserialize(dataMax);
-  expect(valueMax, DateTime.utc(275760, 9, 13));
-
-  final dataMaxPlus1 = Uint8List.fromList([
-    // header
-    0xc7, 12, 0xFF,
-    // nanoseconds
-    0x00, 0x00, 0x00, 0x00,
-    // seconds
-    0x00, 0x00, 0x07, 0xDB, 0xA8, 0x21, 0x80, 0x01,
-  ]);
-  expect(() => deserialize(dataMaxPlus1), throwsA(isA<FormatError>()));
-
-  final dataMin = Uint8List.fromList([
-    // header
-    0xc7, 12, 0xFF,
-    // nanoseconds
-    0x00, 0x00, 0x00, 0x00,
-    // seconds
-    0xFF, 0xFF, 0xF8, 0x24, 0x57, 0xDE, 0x80, 0x00,
-  ]);
-  final valueMin = deserialize(dataMin);
-  expect(valueMin, DateTime.utc(-271821, 4, 20));
-
-  final dataMinMinus1 = Uint8List.fromList([
-    // header
-    0xc7, 12, 0xFF,
-    // nanoseconds
-    0x00, 0x00, 0x00, 0x00,
-    // seconds
-    0xFF, 0xFF, 0xF8, 0x24, 0x57, 0xDE, 0x7F, 0xFF,
-  ]);
-  expect(() => deserialize(dataMinMinus1), throwsA(isA<FormatError>()));
+  expect(value, isA<MsgpackTimestamp>());
+  expect(
+    value,
+    MsgpackTimestamp(BigInt.from(-23198174465), BigInt.from(987655321)),
+  );
 }

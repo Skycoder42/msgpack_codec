@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'byte_data_extensions.dart'
     if (dart.library.js_interop) 'byte_data_extensions_js.dart';
 import 'common.dart';
+import 'msgpack_timestamp.dart';
 
 abstract class ExtDecoder {
   /// Return null if the data cannot be decoded
@@ -219,46 +220,19 @@ class Deserializer {
         final extType => _readCustomExt(extType, length),
       };
 
-  static final _dateTimeOffsetMicroSecondsMax =
-      // 100000000 * 24 * 60 * 60 * 1000 * 1000
-      BigInt.parse('8640000000000000000');
-
-  DateTime _readTimestamp(int length) {
-    int toMicroSecondsSafe(BigInt seconds, BigInt nanoSeconds) {
-      final nanoSecondsSigned =
-          seconds.sign < 0 ? nanoSeconds * BigInt.from(-1) : nanoSeconds;
-      final microSeconds = seconds * BigInt.from(1000000) +
-          nanoSecondsSigned ~/ BigInt.from(1000);
-      if (!microSeconds.isValidInt ||
-          microSeconds.abs() > _dateTimeOffsetMicroSecondsMax) {
-        throw FormatError(
-          'timestamp is to big to be safely represented in dart',
-        );
-      }
-      return microSeconds.toInt();
-    }
-
+  MsgpackTimestamp _readTimestamp(int length) {
     switch (length) {
       case 4:
-        return DateTime.fromMillisecondsSinceEpoch(
-          _readUInt32() * 1000,
-          isUtc: true,
-        );
+        return MsgpackTimestamp(BigInt.from(_readUInt32()));
       case 8:
         final value = _readBigUInt64();
         final nanoSeconds = value >> 34;
         final seconds = value & BigInt.from(0x00000003ffffffff);
-        return DateTime.fromMicrosecondsSinceEpoch(
-          toMicroSecondsSafe(seconds, nanoSeconds),
-          isUtc: true,
-        );
+        return MsgpackTimestamp(seconds, nanoSeconds);
       case 12:
         final nanoSeconds = _readUInt32();
         final seconds = _readBigInt64();
-        return DateTime.fromMicrosecondsSinceEpoch(
-          toMicroSecondsSafe(seconds, BigInt.from(nanoSeconds)),
-          isUtc: true,
-        );
+        return MsgpackTimestamp(seconds, BigInt.from(nanoSeconds));
       default:
         return throw FormatError(
           'Unexpected timestamp length $length. Must be 4, 8 or 12 bytes',
