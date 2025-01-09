@@ -1,0 +1,12 @@
+name: Continuos Integration
+
+on:
+  workflow_dispatch:
+  push:
+
+jobs:
+  ci:
+    name: CI
+    uses: Skycoder42/dart_test_tools/.github/workflows/dart.yml@main
+    with:
+      unitTestPaths: test
