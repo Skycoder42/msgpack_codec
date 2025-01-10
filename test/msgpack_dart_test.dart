@@ -2,6 +2,7 @@
 
 import 'dart:typed_data';
 
+// ignore: no_self_package_imports
 import 'package:msgpack_dart/msgpack_dart.dart';
 import 'package:msgpack_dart/src/msgpack_timestamp.dart';
 import 'package:msgpack_dart/src/serializer.dart';

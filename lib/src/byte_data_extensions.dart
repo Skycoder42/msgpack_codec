@@ -1,7 +1,10 @@
 import 'dart:typed_data';
 
+import 'package:meta/meta.dart';
+
 import 'common.dart';
 
+@internal
 extension ByteDataExtensions on ByteData {
   @pragma('vm:prefer-inline')
   void setUint64Safe(int byteOffset, int value, [Endian endian = Endian.big]) =>

@@ -1,11 +1,14 @@
 import 'dart:js_interop';
 import 'dart:typed_data';
 
+import 'package:meta/meta.dart';
+
 import 'common.dart';
 
 @JS('Number.isSafeInteger')
 external bool _isSafeInteger(int value);
 
+@internal
 extension ByteDataExtensions on ByteData {
   void setUint64Safe(int byteOffset, int value, [Endian endian = Endian.big]) {
     if (!_isSafeInteger(value)) {

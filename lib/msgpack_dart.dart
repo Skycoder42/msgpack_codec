@@ -3,6 +3,11 @@ import 'dart:typed_data';
 import 'src/deserializer.dart';
 import 'src/serializer.dart';
 
+export 'src/common.dart';
+export 'src/deserializer.dart';
+export 'src/msgpack_timestamp.dart';
+export 'src/serializer.dart';
+
 Uint8List serialize(
   dynamic value, {
   ExtEncoder? extEncoder,
