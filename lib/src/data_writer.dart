@@ -9,7 +9,7 @@ const int _kScratchSizeInitial = 64;
 const int _kScratchSizeRegular = 1024;
 
 @internal
-class DataWriter {
+abstract base class DataWriterBase {
   Uint8List? _scratchBuffer;
   ByteData? scratchData;
   int scratchOffset = 0;
@@ -95,7 +95,7 @@ class DataWriter {
     ensureSize(length);
     if (scratchOffset == 0) {
       // we can add it directly
-      _builder.add(bytes);
+      _appendBytes(bytes);
     } else {
       // there is enough room in _scratchBuffer, otherwise _ensureSize
       // would have added _scratchBuffer to _builder and _scratchOffset would
@@ -115,6 +115,64 @@ class DataWriter {
     }
   }
 
+  void ensureSize(int size) {
+    if (_scratchBuffer == null) {
+      // start with small scratch buffer, expand to regular later if needed
+      _scratchBuffer = Uint8List(_kScratchSizeInitial);
+      scratchData =
+          ByteData.view(_scratchBuffer!.buffer, _scratchBuffer!.offsetInBytes);
+    }
+    final remaining = _scratchBuffer!.length - scratchOffset;
+    if (remaining < size) {
+      _appendScratchBuffer();
+    }
+  }
+
+  void _appendScratchBuffer({bool finalize = false}) {
+    if (scratchOffset > 0) {
+      if (_scratchBuffer!.length == _kScratchSizeInitial) {
+        // We're still on small scratch buffer, move it to _builder
+        // and create regular one
+        _appendBytes(
+          Uint8List.view(
+            _scratchBuffer!.buffer,
+            _scratchBuffer!.offsetInBytes,
+            scratchOffset,
+          ),
+        );
+
+        // Don't create new scratch buffer if we're finalizing
+        if (finalize) {
+          return;
+        }
+
+        _scratchBuffer = Uint8List(_kScratchSizeRegular);
+        scratchData = ByteData.view(
+          _scratchBuffer!.buffer,
+          _scratchBuffer!.offsetInBytes,
+        );
+      } else {
+        _appendBytes(
+          Uint8List.fromList(
+            Uint8List.view(
+              _scratchBuffer!.buffer,
+              _scratchBuffer!.offsetInBytes,
+              scratchOffset,
+            ),
+          ),
+        );
+      }
+      scratchOffset = 0;
+    }
+  }
+
+  void _appendBytes(List<int> bytes);
+}
+
+@internal
+final class ByteBufferDataWriter extends DataWriterBase {
+  final _builder = BytesBuilder(copy: false);
+
   Uint8List takeBytes() {
     if (_builder.isEmpty) {
       // Just take scratch data
@@ -133,50 +191,22 @@ class DataWriter {
     }
   }
 
-  void ensureSize(int size) {
-    if (_scratchBuffer == null) {
-      // start with small scratch buffer, expand to regular later if needed
-      _scratchBuffer = Uint8List(_kScratchSizeInitial);
-      scratchData =
-          ByteData.view(_scratchBuffer!.buffer, _scratchBuffer!.offsetInBytes);
-    }
-    final remaining = _scratchBuffer!.length - scratchOffset;
-    if (remaining < size) {
-      _appendScratchBuffer();
-    }
+  @override
+  void _appendBytes(List<int> bytes) => _builder.add(bytes);
+}
+
+@internal
+final class SinkDataWriter extends DataWriterBase {
+  final Sink<Uint8List> sink;
+
+  SinkDataWriter(this.sink);
+
+  void finalize() {
+    _appendScratchBuffer();
+    sink.close();
   }
 
-  void _appendScratchBuffer() {
-    if (scratchOffset > 0) {
-      if (_builder.isEmpty) {
-        // We're still on small scratch buffer, move it to _builder
-        // and create regular one
-        _builder.add(
-          Uint8List.view(
-            _scratchBuffer!.buffer,
-            _scratchBuffer!.offsetInBytes,
-            scratchOffset,
-          ),
-        );
-        _scratchBuffer = Uint8List(_kScratchSizeRegular);
-        scratchData = ByteData.view(
-          _scratchBuffer!.buffer,
-          _scratchBuffer!.offsetInBytes,
-        );
-      } else {
-        _builder.add(
-          Uint8List.fromList(
-            Uint8List.view(
-              _scratchBuffer!.buffer,
-              _scratchBuffer!.offsetInBytes,
-              scratchOffset,
-            ),
-          ),
-        );
-      }
-      scratchOffset = 0;
-    }
-  }
-
-  final _builder = BytesBuilder(copy: false);
+  @override
+  void _appendBytes(List<int> bytes) =>
+      sink.add(bytes is Uint8List ? bytes : Uint8List.fromList(bytes));
 }

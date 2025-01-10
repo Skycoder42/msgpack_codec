@@ -21,6 +21,26 @@ class Float {
   String toString() => value.toString();
 }
 
+class MsgpackEncoder extends Converter<dynamic, Uint8List> {
+  final Encoding _codec;
+  final ExtEncoder? _extEncoder;
+
+  const MsgpackEncoder(this._codec, this._extEncoder);
+
+  @override
+  Uint8List convert(dynamic input) {
+    final writer = ByteBufferDataWriter();
+    // TODO encode data
+    return writer.takeBytes();
+  }
+
+  @override
+  Sink<dynamic> startChunkedConversion(Sink<Uint8List> sink) {
+    final writer = SinkDataWriter(sink);
+    // TODO wrap with sink
+  }
+}
+
 class Serializer {
   final _codec = const Utf8Codec();
   final DataWriter _writer;
