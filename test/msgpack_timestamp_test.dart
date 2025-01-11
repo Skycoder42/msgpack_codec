@@ -1,6 +1,6 @@
 // ignore_for_file: unnecessary_lambdas
 
-import 'package:msgpack_dart/src/msgpack_timestamp.dart';
+import 'package:msgpack_dart/src/common/msgpack_timestamp.dart';
 import 'package:test/test.dart';
 
 void main() {

@@ -2,10 +2,9 @@
 
 import 'dart:typed_data';
 
-// ignore: no_self_package_imports
-import 'package:msgpack_dart/msgpack_dart.dart';
-import 'package:msgpack_dart/src/msgpack_timestamp.dart';
-import 'package:msgpack_dart/src/serializer.dart';
+import 'package:msgpack_dart/src/codec.dart';
+import 'package:msgpack_dart/src/common/msgpack_timestamp.dart';
+import 'package:msgpack_dart/src/writer/float.dart';
 import 'package:test/test.dart';
 
 import 'test_utils.dart' if (dart.library.js_interop) 'test_utils_js.dart';
@@ -115,8 +114,8 @@ void largeArray() {
     list.add('Item $i');
   }
 
-  final serialized = serialize(list);
-  final deserialized = deserialize(serialized) as List;
+  final serialized = msgPack.encode(list);
+  final deserialized = msgPack.decode(serialized) as List;
   expect(deserialized, list);
 }
 
@@ -126,8 +125,8 @@ void veryLargeArray() {
     list.add('Item $i');
   }
 
-  final serialized = serialize(list);
-  final deserialized = deserialize(serialized) as List;
+  final serialized = msgPack.encode(list);
+  final deserialized = msgPack.decode(serialized) as List;
   expect(deserialized, list);
 }
 
@@ -136,8 +135,8 @@ void largeMap() {
   for (var i = 0; i < 16; ++i) {
     map[i] = 'Item $i';
   }
-  final serialized = serialize(map);
-  final deserialized = deserialize(serialized) as Map;
+  final serialized = msgPack.encode(map);
+  final deserialized = msgPack.decode(serialized) as Map;
   expect(deserialized, map);
 }
 
@@ -146,53 +145,53 @@ void veryLargeMap() {
   for (var i = 0; i < 65536; ++i) {
     map[i] = 'Item $i';
   }
-  final serialized = serialize(map);
-  final deserialized = deserialize(serialized) as Map;
+  final serialized = msgPack.encode(map);
+  final deserialized = msgPack.decode(serialized) as Map;
   expect(deserialized, map);
 }
 
 void packNull() {
-  final List<int> encoded = serialize(null);
+  final List<int> encoded = msgPack.encode(null);
   expect(encoded, orderedEquals([0xc0]));
 }
 
 void packFalse() {
-  final List<int> encoded = serialize(false);
+  final List<int> encoded = msgPack.encode(false);
   expect(encoded, orderedEquals([0xc2]));
 }
 
 void packTrue() {
-  final List<int> encoded = serialize(true);
+  final List<int> encoded = msgPack.encode(true);
   expect(encoded, orderedEquals([0xc3]));
 }
 
 void packPositiveFixInt() {
-  final List<int> encoded = serialize(1);
+  final List<int> encoded = msgPack.encode(1);
   expect(encoded, orderedEquals([1]));
 }
 
 void packFixedNegative() {
-  final List<int> encoded = serialize(-16);
+  final List<int> encoded = msgPack.encode(-16);
   expect(encoded, orderedEquals([240]));
 }
 
 void packUint8() {
-  final List<int> encoded = serialize(128);
+  final List<int> encoded = msgPack.encode(128);
   expect(encoded, orderedEquals([204, 128]));
 }
 
 void packUint16() {
-  final List<int> encoded = serialize(32768);
+  final List<int> encoded = msgPack.encode(32768);
   expect(encoded, orderedEquals([205, 128, 0]));
 }
 
 void packUint32() {
-  final List<int> encoded = serialize(2147483648);
+  final List<int> encoded = msgPack.encode(2147483648);
   expect(encoded, orderedEquals([206, 128, 0, 0, 0]));
 }
 
 void packUint64() {
-  final List<int> encoded = serialize(uint64TestValue);
+  final List<int> encoded = msgPack.encode(uint64TestValue);
   expect(
     encoded,
     orderedEquals(uint64Packed),
@@ -200,32 +199,32 @@ void packUint64() {
 }
 
 void packInt8() {
-  final List<int> encoded = serialize(-128);
+  final List<int> encoded = msgPack.encode(-128);
   expect(encoded, orderedEquals([208, 128]));
 }
 
 void packInt16() {
-  final List<int> encoded = serialize(-32768);
+  final List<int> encoded = msgPack.encode(-32768);
   expect(encoded, orderedEquals([209, 128, 0]));
 }
 
 void packInt32() {
-  final List<int> encoded = serialize(-2147483648);
+  final List<int> encoded = msgPack.encode(-2147483648);
   expect(encoded, orderedEquals([210, 128, 0, 0, 0]));
 }
 
 void packInt64() {
-  final List<int> encoded = serialize(int64TestValue);
+  final List<int> encoded = msgPack.encode(int64TestValue);
   expect(encoded, orderedEquals(int64Packed));
 }
 
 void packFloat32() {
-  final List<int> encoded = serialize(Float(3.14));
+  final List<int> encoded = msgPack.encode(Float(3.14));
   expect(encoded, orderedEquals([202, 64, 72, 245, 195]));
 }
 
 void packDouble() {
-  final List<int> encoded = serialize(3.14);
+  final List<int> encoded = msgPack.encode(3.14);
   expect(
     encoded,
     orderedEquals([0xcb, 0x40, 0x09, 0x1e, 0xb8, 0x51, 0xeb, 0x85, 0x1f]),
@@ -233,12 +232,12 @@ void packDouble() {
 }
 
 void packString5() {
-  final List<int> encoded = serialize('hello');
+  final List<int> encoded = msgPack.encode('hello');
   expect(encoded, orderedEquals([165, 104, 101, 108, 108, 111]));
 }
 
 void packString22() {
-  final List<int> encoded = serialize('hello there, everyone!');
+  final List<int> encoded = msgPack.encode('hello there, everyone!');
   expect(
     encoded,
     orderedEquals([
@@ -270,7 +269,7 @@ void packString22() {
 }
 
 void packString256() {
-  final List<int> encoded = serialize(
+  final List<int> encoded = msgPack.encode(
     // ignore: lines_longer_than_80_chars
     'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',
   );
@@ -281,7 +280,7 @@ void packString256() {
 
 void packBin8() {
   final data = Uint8List.fromList(List.filled(32, 65));
-  final List<int> encoded = serialize(data);
+  final List<int> encoded = msgPack.encode(data);
   expect(encoded.length, equals(34));
   expect(encoded.getRange(0, 2), orderedEquals([0xc4, 32]));
   expect(encoded.getRange(2, encoded.length), orderedEquals(data));
@@ -289,7 +288,7 @@ void packBin8() {
 
 void packBin16() {
   final data = Uint8List.fromList(List.filled(256, 65));
-  final List<int> encoded = serialize(data);
+  final List<int> encoded = msgPack.encode(data);
   expect(encoded.length, equals(256 + 3));
   expect(encoded.getRange(0, 3), orderedEquals([0xc5, 1, 0]));
   expect(encoded.getRange(3, encoded.length), orderedEquals(data));
@@ -297,7 +296,7 @@ void packBin16() {
 
 void packBin32() {
   final data = Uint8List.fromList(List.filled(65536, 65));
-  final List<int> encoded = serialize(data);
+  final List<int> encoded = msgPack.encode(data);
   expect(encoded.length, equals(65536 + 5));
   expect(encoded.getRange(0, 5), orderedEquals([0xc6, 0, 1, 0, 0]));
   expect(encoded.getRange(5, encoded.length), orderedEquals(data));
@@ -305,7 +304,7 @@ void packBin32() {
 
 void packByteData() {
   final data = ByteData.view(Uint8List.fromList(List.filled(32, 65)).buffer);
-  final List<int> encoded = serialize(data);
+  final List<int> encoded = msgPack.encode(data);
   expect(encoded.length, equals(34));
   expect(encoded.getRange(0, 2), orderedEquals([0xc4, 32]));
   expect(
@@ -315,7 +314,7 @@ void packByteData() {
 }
 
 void packStringArray() {
-  final List<int> encoded = serialize(['one', 'two', 'three']);
+  final List<int> encoded = msgPack.encode(['one', 'two', 'three']);
   expect(
     encoded,
     orderedEquals([
@@ -339,7 +338,7 @@ void packStringArray() {
 }
 
 void packIntToStringMap() {
-  final List<int> encoded = serialize({1: 'one', 2: 'two'});
+  final List<int> encoded = msgPack.encode({1: 'one', 2: 'two'});
   expect(
     encoded,
     orderedEquals([130, 1, 163, 111, 110, 101, 2, 163, 116, 119, 111]),
@@ -348,7 +347,7 @@ void packIntToStringMap() {
 
 void packTimestamp32() {
   final timestamp = MsgpackTimestamp(BigInt.from(1605623935));
-  final encoded = serialize(timestamp);
+  final encoded = msgPack.encode(timestamp);
   expect(
     encoded,
     orderedEquals([
@@ -367,7 +366,7 @@ void packTimestamp64() {
   );
   // seconds(34): __00 0101 1111 1011 0011 1110 0000 0111 1111
   // nanoseconds(30): 0001 1101 0110 1111 0010 1000 0000 00__
-  final encoded = serialize(timestamp);
+  final encoded = msgPack.encode(timestamp);
   expect(
     encoded,
     orderedEquals([
@@ -388,7 +387,7 @@ void packTimestamp96() {
     BigInt.from(-23198174465),
     BigInt.from(987655321),
   );
-  final encoded = serialize(timestamp);
+  final encoded = msgPack.encode(timestamp);
   expect(
     encoded,
     orderedEquals(
@@ -407,25 +406,25 @@ void packTimestamp96() {
 // Test unpacking
 void unpackNull() {
   final data = Uint8List.fromList([0xc0]);
-  final value = deserialize(data);
+  final value = msgPack.decode(data);
   expect(value, isNull);
 }
 
 void unpackFalse() {
   final data = Uint8List.fromList([0xc2]);
-  final value = deserialize(data);
+  final value = msgPack.decode(data);
   expect(value, isFalse);
 }
 
 void unpackTrue() {
   final data = Uint8List.fromList([0xc3]);
-  final value = deserialize(data);
+  final value = msgPack.decode(data);
   expect(value, isTrue);
 }
 
 void unpackString5() {
   final data = Uint8List.fromList([165, 104, 101, 108, 108, 111]);
-  final value = deserialize(data);
+  final value = msgPack.decode(data);
   expect(value, isString);
   expect(value, equals('hello'));
 }
@@ -456,42 +455,42 @@ void unpackString22() {
     101,
     33,
   ]);
-  final value = deserialize(data);
+  final value = msgPack.decode(data);
   expect(value, isString);
   expect(value, equals('hello there, everyone!'));
 }
 
 void unpackPositiveFixInt() {
   final data = Uint8List.fromList([1]);
-  final value = deserialize(data);
+  final value = msgPack.decode(data);
   expect(value, isInt);
   expect(value, equals(1));
 }
 
 void unpackNegativeFixInt() {
   final data = Uint8List.fromList([240]);
-  final value = deserialize(data);
+  final value = msgPack.decode(data);
   expect(value, isInt);
   expect(value, equals(-16));
 }
 
 void unpackUint8() {
   final data = Uint8List.fromList([204, 128]);
-  final value = deserialize(data);
+  final value = msgPack.decode(data);
   expect(value, isInt);
   expect(value, equals(128));
 }
 
 void unpackUint16() {
   final data = Uint8List.fromList([205, 128, 0]);
-  final value = deserialize(data);
+  final value = msgPack.decode(data);
   expect(value, isInt);
   expect(value, equals(32768));
 }
 
 void unpackUint32() {
   final data = Uint8List.fromList([206, 128, 0, 0, 0]);
-  final value = deserialize(data);
+  final value = msgPack.decode(data);
   expect(value, isInt);
   expect(value, equals(2147483648));
 }
@@ -499,42 +498,42 @@ void unpackUint32() {
 void unpackUint64() {
   // Dart 2 doesn't support true Uint64 without using BigInt
   final data = Uint8List.fromList(uint64Packed);
-  final value = deserialize(data);
+  final value = msgPack.decode(data);
   expect(value, isInt);
   expect(value, equals(uint64TestValue));
 }
 
 void unpackInt8() {
   final data = Uint8List.fromList([208, 128]);
-  final value = deserialize(data);
+  final value = msgPack.decode(data);
   expect(value, isInt);
   expect(value, equals(-128));
 }
 
 void unpackInt16() {
   final data = Uint8List.fromList([209, 128, 0]);
-  final value = deserialize(data);
+  final value = msgPack.decode(data);
   expect(value, isInt);
   expect(value, equals(-32768));
 }
 
 void unpackInt32() {
   final data = Uint8List.fromList([210, 128, 0, 0, 0]);
-  final value = deserialize(data);
+  final value = msgPack.decode(data);
   expect(value, isInt);
   expect(value, equals(-2147483648));
 }
 
 void unpackInt64() {
   final data = Uint8List.fromList(int64Packed);
-  final value = deserialize(data);
+  final value = msgPack.decode(data);
   expect(value, isInt);
   expect(value, equals(int64TestValue));
 }
 
 void unpackFloat32() {
   final data = Uint8List.fromList([202, 64, 72, 245, 195]);
-  final value = deserialize(data);
+  final value = msgPack.decode(data);
   expect((value as double).toStringAsPrecision(3), equals('3.14'));
 }
 
@@ -542,13 +541,13 @@ void unpackDouble() {
   final data = Uint8List.fromList(
     [0xcb, 0x40, 0x09, 0x1e, 0xb8, 0x51, 0xeb, 0x85, 0x1f],
   );
-  final value = deserialize(data);
+  final value = msgPack.decode(data);
   expect(value, equals(3.14));
 }
 
 void unpackString256() {
   final data = Uint8List.fromList([218, 1, 0, ...List.filled(256, 65)]);
-  final value = deserialize(data);
+  final value = msgPack.decode(data);
   expect(value, isString);
   expect(
     value,
@@ -577,7 +576,7 @@ void unpackStringArray() {
     101,
     101,
   ]);
-  final value = deserialize(data);
+  final value = msgPack.decode(data);
   expect(value, isList);
   expect(value, orderedEquals(['one', 'two', 'three']));
 }
@@ -586,7 +585,7 @@ void unpackIntToStringMap() {
   final data = Uint8List.fromList(
     [130, 1, 163, 111, 110, 101, 2, 163, 116, 119, 111],
   );
-  final value = deserialize(data);
+  final value = msgPack.decode(data);
   expect(value, isMap);
   value as Map;
   expect(value[1], equals('one'));
@@ -600,7 +599,7 @@ void unpackTimestamp32() {
     // seconds
     0x5F, 0xB3, 0xE0, 0x7F,
   ]);
-  final value = deserialize(data);
+  final value = msgPack.decode(data);
 
   expect(value, isA<MsgpackTimestamp>());
   expect(value, MsgpackTimestamp(BigInt.from(1605623935)));
@@ -617,7 +616,7 @@ void unpackTimestamp64() {
     // seconds
     0x5F, 0xB3, 0xE0, 0x7F,
   ]);
-  final value = deserialize(data);
+  final value = msgPack.decode(data);
 
   expect(value, isA<MsgpackTimestamp>());
   expect(
@@ -635,7 +634,7 @@ void unpackTimestamp96() {
     // seconds
     0xFF, 0xFF, 0xFF, 0xFA, 0x99, 0x47, 0xF2, 0xFF,
   ]);
-  final value = deserialize(data);
+  final value = msgPack.decode(data);
 
   expect(value, isA<MsgpackTimestamp>());
   expect(

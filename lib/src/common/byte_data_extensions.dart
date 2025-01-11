@@ -2,7 +2,7 @@ import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
 
-import 'common.dart';
+import 'format_error.dart';
 
 @internal
 extension ByteDataExtensions on ByteData {

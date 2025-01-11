@@ -1,31 +1,8 @@
-import 'dart:typed_data';
-
-import 'src/deserializer.dart';
-import 'src/serializer.dart';
-
-export 'src/common.dart';
-export 'src/deserializer.dart';
-export 'src/msgpack_timestamp.dart';
-export 'src/serializer.dart';
-
-Uint8List serialize(
-  dynamic value, {
-  ExtEncoder? extEncoder,
-}) {
-  final s = Serializer(extEncoder: extEncoder);
-  s.encode(value);
-  return s.takeBytes();
-}
-
-dynamic deserialize(
-  Uint8List list, {
-  ExtDecoder? extDecoder,
-  bool copyBinaryData = false,
-}) {
-  final d = Deserializer(
-    list,
-    extDecoder: extDecoder,
-    copyBinaryData: copyBinaryData,
-  );
-  return d.decode();
-}
+export 'src/codec.dart';
+export 'src/common/format_error.dart';
+export 'src/common/msgpack_timestamp.dart';
+export 'src/reader/decoder.dart';
+export 'src/reader/ext_decoder.dart';
+export 'src/writer/encoder.dart';
+export 'src/writer/ext_encoder.dart';
+export 'src/writer/float.dart';

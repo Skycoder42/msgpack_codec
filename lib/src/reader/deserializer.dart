@@ -1,25 +1,25 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'byte_data_extensions.dart'
-    if (dart.library.js_interop) 'byte_data_extensions_js.dart';
-import 'common.dart';
-import 'msgpack_timestamp.dart';
+import 'package:meta/meta.dart';
 
-abstract class ExtDecoder {
-  /// Return null if the data cannot be decoded
-  dynamic decodeObject(int extType, Uint8List data);
-}
+import '../common/byte_data_extensions.dart'
+    if (dart.library.js_interop) '../common/byte_data_extensions_js.dart';
+import '../common/format_error.dart';
+import '../common/msgpack_timestamp.dart';
+import 'ext_decoder.dart';
 
+@internal
 class Deserializer {
   final ExtDecoder? _extDecoder;
-  final codec = const Utf8Codec();
+  final Encoding _codec;
   final Uint8List _list;
   final ByteData _data;
   int _offset = 0;
 
   Deserializer(
-    Uint8List list, {
+    Uint8List list,
+    this._codec, {
     ExtDecoder? extDecoder,
     this.copyBinaryData = false,
   })  : _list = list,
@@ -191,7 +191,7 @@ class Deserializer {
     final len = list.length;
     for (var i = 0; i < len; ++i) {
       if (list[i] > 127) {
-        return codec.decode(list);
+        return _codec.decode(list);
       }
     }
     return String.fromCharCodes(list);

@@ -1,56 +1,21 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'common.dart';
+import 'package:meta/meta.dart';
+
+import '../common/format_error.dart';
+import '../common/msgpack_timestamp.dart';
 import 'data_writer.dart';
-import 'msgpack_timestamp.dart';
+import 'ext_encoder.dart';
+import 'float.dart';
 
-abstract interface class ExtEncoder {
-  /// Return null if object can't be encoded
-  int? extTypeForObject(dynamic object);
-
-  Uint8List encodeObject(dynamic object);
-}
-
-class Float {
-  Float(this.value);
-
-  final double value;
-
-  @override
-  String toString() => value.toString();
-}
-
-class MsgpackEncoder extends Converter<dynamic, Uint8List> {
+@internal
+class Serializer {
+  final DataWriterBase _writer;
   final Encoding _codec;
   final ExtEncoder? _extEncoder;
 
-  const MsgpackEncoder(this._codec, this._extEncoder);
-
-  @override
-  Uint8List convert(dynamic input) {
-    final writer = ByteBufferDataWriter();
-    // TODO encode data
-    return writer.takeBytes();
-  }
-
-  @override
-  Sink<dynamic> startChunkedConversion(Sink<Uint8List> sink) {
-    final writer = SinkDataWriter(sink);
-    // TODO wrap with sink
-  }
-}
-
-class Serializer {
-  final _codec = const Utf8Codec();
-  final DataWriter _writer;
-  final ExtEncoder? _extEncoder;
-
-  Serializer({
-    DataWriter? dataWriter,
-    ExtEncoder? extEncoder,
-  })  : _writer = dataWriter ?? DataWriter(),
-        _extEncoder = extEncoder;
+  Serializer(this._writer, this._codec, this._extEncoder);
 
   void encode(dynamic d) {
     if (d == null) return _writer.writeUint8(0xc0);
@@ -74,8 +39,6 @@ class Serializer {
     if (d is MsgpackTimestamp) return _writeTimeStamp(d);
     throw FormatError("Don't know how to serialize $d");
   }
-
-  Uint8List takeBytes() => _writer.takeBytes();
 
   void _writeNegativeInt(int n) {
     if (n >= -32) {

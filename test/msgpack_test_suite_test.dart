@@ -4,9 +4,10 @@ import 'dart:typed_data';
 
 import 'package:collection/collection.dart';
 import 'package:meta/meta.dart';
-import 'package:msgpack_dart/src/deserializer.dart';
-import 'package:msgpack_dart/src/msgpack_timestamp.dart';
-import 'package:msgpack_dart/src/serializer.dart';
+import 'package:msgpack_dart/src/codec.dart';
+import 'package:msgpack_dart/src/common/msgpack_timestamp.dart';
+import 'package:msgpack_dart/src/reader/ext_decoder.dart';
+import 'package:msgpack_dart/src/writer/ext_encoder.dart';
 import 'package:test/test.dart';
 
 @immutable
@@ -104,6 +105,11 @@ void main() {
   }
 }
 
+const _testCodec = MsgpackCodec(
+  extEncoder: TestSuiteExtEncoder(),
+  extDecoder: TestSuiteExtDecoder(),
+);
+
 void _testValue(dynamic value, List<String> msgpack, {Object? skip}) {
   _testEncode(value, msgpack, skip: skip);
   _testDecode(value, msgpack, skip: skip);
@@ -114,9 +120,7 @@ void _testEncode(dynamic value, List<String> msgpack, {Object? skip}) {
     'serializes $value to any of $msgpack',
     skip: skip,
     () {
-      final serializer = Serializer(extEncoder: const TestSuiteExtEncoder());
-      serializer.encode(value);
-      final encoded = serializer.takeBytes();
+      final encoded = _testCodec.encode(value);
       expect(encoded, _hexEqualsAny(msgpack));
     },
   );
@@ -126,11 +130,7 @@ void _testDecode(dynamic value, List<String> msgpack, {Object? skip}) {
   group('deserializes $value from', skip: skip, () {
     for (final representation in msgpack) {
       test('"$representation"', () {
-        final deserializer = Deserializer(
-          _hexToBytes(representation),
-          extDecoder: const TestSuiteExtDecoder(),
-        );
-        final decoded = deserializer.decode();
+        final decoded = _testCodec.decode(_hexToBytes(representation));
         expect(decoded, value);
       });
     }

@@ -3,7 +3,7 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:msgpack_dart/msgpack_dart.dart' as m2;
+import 'package:msgpack_dart/msgpack_dart.dart';
 
 const int _times = 10000;
 
@@ -22,7 +22,7 @@ Future<void> main(List<String> args) async {
     }
 
     final jsonBytes = utf8.encode(json.encode(numbers)).length;
-    final msgpack2Bytes = m2.serialize(numbers).length;
+    final msgpack2Bytes = msgPack.encode(numbers).length;
     print('JSON: $jsonBytes bytes, MSGPACK: $msgpack2Bytes bytes');
     exit(0);
   }
@@ -331,13 +331,13 @@ dynamic testObjectEncode(String desc, dynamic input, bool markdown) {
   final nSize = size;
 
   watch.reset();
-  size = m2.serialize(input).length;
+  size = msgPack.encode(input).length;
   times.clear();
   watchTotal.reset();
   for (var i = 1; i <= _times; i++) {
     watch.reset();
     watch.start();
-    m2.serialize(input);
+    msgPack.encode(input);
     watch.stop();
     times.add(watch.elapsedMicroseconds);
   }

@@ -2,8 +2,8 @@ import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
 
-import 'byte_data_extensions.dart'
-    if (dart.library.js_interop) 'byte_data_extensions_js.dart';
+import '../common/byte_data_extensions.dart'
+    if (dart.library.js_interop) '../common/byte_data_extensions_js.dart';
 
 const int _kScratchSizeInitial = 64;
 const int _kScratchSizeRegular = 1024;

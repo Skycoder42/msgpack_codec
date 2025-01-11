@@ -3,7 +3,7 @@ import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
 
-import 'common.dart';
+import 'format_error.dart';
 
 @JS('Number.isSafeInteger')
 external bool _isSafeInteger(int value);
