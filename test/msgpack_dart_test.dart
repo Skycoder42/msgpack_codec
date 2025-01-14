@@ -219,7 +219,7 @@ void packInt64() {
 }
 
 void packFloat32() {
-  final List<int> encoded = msgPack.encode(Float(3.14));
+  final List<int> encoded = msgPack.encode(const Float(3.14));
   expect(encoded, orderedEquals([202, 64, 72, 245, 195]));
 }
 

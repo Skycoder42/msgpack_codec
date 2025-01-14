@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:collection/collection.dart';
@@ -112,7 +113,9 @@ const _testCodec = MsgpackCodec(
 
 void _testValue(dynamic value, List<String> msgpack, {Object? skip}) {
   _testEncode(value, msgpack, skip: skip);
+  _testEncodeChunked(value, msgpack, skip: skip);
   _testDecode(value, msgpack, skip: skip);
+  _testDecodeChunked(value, msgpack, skip: skip);
 }
 
 void _testEncode(dynamic value, List<String> msgpack, {Object? skip}) {
@@ -126,12 +129,49 @@ void _testEncode(dynamic value, List<String> msgpack, {Object? skip}) {
   );
 }
 
+void _testEncodeChunked(dynamic value, List<String> msgpack, {Object? skip}) {
+  test(
+    'serializes $value to any of $msgpack (chunked)',
+    skip: skip,
+    () async {
+      final encoded = Stream.value(value)
+          .transform(_testCodec.encoder)
+          .expand((chunk) => chunk)
+          .toList();
+      expect(encoded, completion(_hexEqualsAny(msgpack)));
+    },
+  );
+}
+
 void _testDecode(dynamic value, List<String> msgpack, {Object? skip}) {
   group('deserializes $value from', skip: skip, () {
     for (final representation in msgpack) {
       test('"$representation"', () {
         final decoded = _testCodec.decode(_hexToBytes(representation));
         expect(decoded, value);
+      });
+    }
+  });
+}
+
+final _rng = Random.secure();
+
+void _testDecodeChunked(dynamic value, List<String> msgpack, {Object? skip}) {
+  group('deserializes $value from', skip: skip, () {
+    for (final representation in msgpack) {
+      test('"$representation" (chunked)', () {
+        final bytes = _hexToBytes(representation);
+        final chunks = <Uint8List>[];
+        var offset = 0;
+        while (offset < bytes.length) {
+          final chunkSize = _rng.nextInt(bytes.length - offset) + 1;
+          chunks.add(bytes.sublist(offset, offset + chunkSize));
+          offset += chunkSize;
+        }
+
+        final decoded =
+            Stream.fromIterable(chunks).transform(_testCodec.decoder).single;
+        expect(decoded, completion(value));
       });
     }
   });

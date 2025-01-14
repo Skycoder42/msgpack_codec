@@ -15,16 +15,17 @@ class Deserializer {
   final Encoding _codec;
   final Uint8List _list;
   final ByteData _data;
-  int _offset = 0;
+  int _offset;
 
   Deserializer(
-    Uint8List list,
+    this._list,
     this._codec, {
     ExtDecoder? extDecoder,
     this.copyBinaryData = false,
-  })  : _list = list,
-        _data = ByteData.view(list.buffer, list.offsetInBytes),
-        _extDecoder = extDecoder;
+    int initialOffset = 0,
+  })  : _data = ByteData.view(_list.buffer, _list.offsetInBytes),
+        _extDecoder = extDecoder,
+        _offset = initialOffset;
 
   /// If false, decoded binary data buffers will reference underlying input
   /// buffer and thus may change when the content of input buffer changes.
@@ -32,6 +33,8 @@ class Deserializer {
   /// If true, decoded buffers are copies and the underlying input buffer is
   /// free to change after decoding.
   final bool copyBinaryData;
+
+  int get currentOffset => _offset;
 
   dynamic decode() {
     final u = _list[_offset++];
