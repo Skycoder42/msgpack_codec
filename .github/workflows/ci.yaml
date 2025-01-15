@@ -9,4 +9,5 @@ jobs:
     name: CI
     uses: Skycoder42/dart_test_tools/.github/workflows/dart.yml@main
     with:
+      withSubmodules: true
       unitTestPaths: test
