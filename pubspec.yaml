@@ -1,5 +1,5 @@
 name: msgpack_dart
-description: Message Pack implementation for dart
+description: A message pack implementation for dart that works on all platforms.
 version: 1.0.1
 homepage: https://github.com/Skycoder42/msgpack_dart
 
