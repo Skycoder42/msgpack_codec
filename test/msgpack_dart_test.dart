@@ -1,5 +1,6 @@
 // ignore_for_file: avoid_print
 
+import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:msgpack_dart/src/codec.dart';
@@ -63,6 +64,8 @@ void main() {
     test('Pack timestamp96', packTimestamp96);
   });
 
+  test('Test Pack chunked', packChunked);
+
   test('Test Unpack Null', unpackNull);
 
   group('Test Unpack boolean', () {
@@ -106,6 +109,8 @@ void main() {
     test('Unpack timestamp64', unpackTimestamp64);
     test('Unpack timestamp96', unpackTimestamp96);
   });
+
+  test('Test Unpack chunked', unpackChunked);
 }
 
 void largeArray() {
@@ -403,6 +408,31 @@ void packTimestamp96() {
   );
 }
 
+Future<void> packChunked() async {
+  final data = [
+    'this is',
+    1,
+    true,
+    'test.',
+  ];
+
+  final encoded = await Stream<dynamic>.fromIterable(data)
+      .transform(msgPack.encoder)
+      .expand((b) => b)
+      .toList();
+
+  expect(encoded, [
+    // this is
+    0Xa7, 0x74, 0x68, 0x69, 0x73, 0x20, 0x69, 0x73,
+    // 1
+    0x01,
+    // true
+    0xc3,
+    // test.
+    0xa5, 0x74, 0x65, 0x73, 0x74, 0x2e,
+  ]);
+}
+
 // Test unpacking
 void unpackNull() {
   final data = Uint8List.fromList([0xc0]);
@@ -641,4 +671,33 @@ void unpackTimestamp96() {
     value,
     MsgpackTimestamp(BigInt.from(-23198174465), BigInt.from(987655321)),
   );
+}
+
+Future<void> unpackChunked() async {
+  final data = [
+    // this is
+    [0Xa7, 0x74, 0x68, 0x69, 0x73, 0x20, 0x69, 0x73],
+    [
+      // 1
+      0x01,
+      // true
+      0xc3,
+      // <string start>
+      0xa5,
+    ],
+    // test.
+    [0x74, 0x65], [0x73, 0x74, 0x2e],
+  ];
+
+  final decoded = await Stream.fromIterable(data)
+      .map(Uint8List.fromList)
+      .transform(msgPack.decoder)
+      .toList();
+
+  expect(decoded, [
+    'this is',
+    1,
+    true,
+    'test.',
+  ]);
 }
