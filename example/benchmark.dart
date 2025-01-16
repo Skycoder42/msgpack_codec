@@ -3,7 +3,7 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:msgpack_dart/msgpack_dart.dart';
+import 'package:msgpack_dart2/msgpack_dart2.dart';
 
 const int _times = 10000;
 

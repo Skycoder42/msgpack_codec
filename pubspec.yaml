@@ -1,6 +1,6 @@
-name: msgpack_dart
+name: msgpack_dart2
 description: A message pack implementation for dart that works on all platforms.
-version: 1.0.1
+version: 2.0.0
 homepage: https://github.com/Skycoder42/msgpack_dart
 
 environment:
@@ -20,3 +20,8 @@ dart_pre_commit:
   pull-up-dependencies:
     allowed:
       - meta
+
+cider:
+  link_template:
+    tag: https://github.com/Skycoder42/msgpack_dart/releases/tag/v%tag% # initial release link template
+    diff: https://github.com/Skycoder42/msgpack_dart/compare/v%from%...v%to% # subsequent releases link template
