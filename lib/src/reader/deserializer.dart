@@ -114,7 +114,7 @@ class Deserializer {
       case 0xc9:
         return _readExt(_readUInt32());
       default:
-        throw FormatError('Invalid MessagePack format');
+        throw MsgpackFormatException('Invalid MessagePack format');
     }
   }
 
@@ -237,7 +237,7 @@ class Deserializer {
         final seconds = _readBigInt64();
         return MsgpackTimestamp(seconds, BigInt.from(nanoSeconds));
       default:
-        return throw FormatError(
+        return throw MsgpackFormatException(
           'Unexpected timestamp length $length. Must be 4, 8 or 12 bytes',
         );
     }
@@ -249,7 +249,7 @@ class Deserializer {
     if (decoded != null) {
       return decoded;
     }
-    throw FormatError(
+    throw MsgpackFormatException(
       "Don't know how to deserialize "
       '0x${extType.toRadixString(16).padLeft(2, '0')}',
     );

@@ -38,7 +38,7 @@ extension ByteDataExtensions on ByteData {
       return;
     }
 
-    throw FormatError(
+    throw MsgpackFormatException(
       'Value is too big to be serialized as a 64 bit integer',
     );
   }
@@ -49,7 +49,7 @@ extension ByteDataExtensions on ByteData {
     Endian endian = Endian.big,
   ]) {
     if (!value.isValidInt) {
-      throw FormatError(
+      throw MsgpackFormatException(
         'Value is too big/small to be serialized as a 64 bit integer',
       );
     }

@@ -1,5 +1,6 @@
 import 'package:meta/meta.dart';
 
+// coverage:ignore-start
 class TimestampTruncatedException implements Exception {
   final String message;
 
@@ -8,6 +9,7 @@ class TimestampTruncatedException implements Exception {
   @override
   String toString() => 'TimestampTruncatedException: $message';
 }
+// coverage:ignore-end
 
 @immutable
 class MsgpackTimestamp implements Comparable<MsgpackTimestamp> {
@@ -68,11 +70,13 @@ class MsgpackTimestamp implements Comparable<MsgpackTimestamp> {
       }
     }
 
+    // coverage:ignore-start
     if (!microSeconds.isValidInt) {
       throw TimestampTruncatedException(
-        'Timestamp is cannot be represented as integer',
+        'Timestamp cannot be represented as integer',
       );
     }
+    // coverage:ignore-end
 
     final dateTime = DateTime.fromMicrosecondsSinceEpoch(
       microSeconds.toInt(),

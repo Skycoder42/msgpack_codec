@@ -3,11 +3,11 @@ import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
 
+import '../common/float.dart';
 import '../common/format_error.dart';
 import '../common/msgpack_timestamp.dart';
 import 'data_writer.dart';
 import 'ext_encoder.dart';
-import 'float.dart';
 
 @internal
 class Serializer {
@@ -37,7 +37,7 @@ class Serializer {
     }
     // run built-in extensions AFTER the custom ones
     if (d is MsgpackTimestamp) return _writeTimeStamp(d);
-    throw FormatError("Don't know how to serialize $d");
+    throw MsgpackFormatException("Don't know how to serialize $d");
   }
 
   void _writeNegativeInt(int n) {
@@ -101,7 +101,9 @@ class Serializer {
       _writer.writeUint8(0xdb);
       _writer.writeUint32(length);
     } else {
-      throw FormatError('String is too long to be serialized with msgpack.');
+      throw MsgpackFormatException(
+        'String is too long to be serialized with msgpack.',
+      );
     }
     _writer.writeBytes(encoded);
   }
@@ -118,7 +120,9 @@ class Serializer {
       _writer.writeUint8(0xc6);
       _writer.writeUint32(length);
     } else {
-      throw FormatError('Data is too long to be serialized with msgpack.');
+      throw MsgpackFormatException(
+        'Data is too long to be serialized with msgpack.',
+      );
     }
     _writer.writeBytes(buffer);
   }
@@ -135,7 +139,9 @@ class Serializer {
       _writer.writeUint8(0xdd);
       _writer.writeUint32(length);
     } else {
-      throw FormatError('Array is too big to be serialized with msgpack');
+      throw MsgpackFormatException(
+        'Array is too big to be serialized with msgpack',
+      );
     }
 
     for (final item in iterable) {
@@ -155,7 +161,9 @@ class Serializer {
       _writer.writeUint8(0xdf);
       _writer.writeUint32(length);
     } else {
-      throw FormatError('Map is too big to be serialized with msgpack');
+      throw MsgpackFormatException(
+        'Map is too big to be serialized with msgpack',
+      );
     }
 
     for (final item in map.entries) {
@@ -188,11 +196,13 @@ class Serializer {
     final type = _extEncoder?.extTypeForObject(object);
     if (type != null) {
       if (type < 0) {
-        throw FormatError('Negative ext type is reserved');
+        throw MsgpackFormatException('Negative ext type is reserved');
       }
       final encoded = _extEncoder?.encodeObject(object);
       if (encoded == null) {
-        throw FormatError('Unable to encode object. No Encoder specified.');
+        throw MsgpackFormatException(
+          'Unable to encode object. No Encoder specified.',
+        );
       }
 
       final length = encoded.length;
@@ -216,7 +226,7 @@ class Serializer {
         _writer.writeUint8(0xc9);
         _writer.writeUint32(length);
       } else {
-        throw FormatError('Size must be at most 0xFFFFFFFF');
+        throw MsgpackFormatException('Size must be at most 0xFFFFFFFF');
       }
       _writer.writeUint8(type);
       _writer.writeBytes(encoded);

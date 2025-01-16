@@ -4,8 +4,8 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:msgpack_dart/src/codec.dart';
+import 'package:msgpack_dart/src/common/float.dart';
 import 'package:msgpack_dart/src/common/msgpack_timestamp.dart';
-import 'package:msgpack_dart/src/writer/float.dart';
 import 'package:test/test.dart';
 
 import 'test_utils.dart' if (dart.library.js_interop) 'test_utils_js.dart';
@@ -48,6 +48,7 @@ void main() {
   test('Pack 5-character string', packString5);
   test('Pack 22-character string', packString22);
   test('Pack 256-character string', packString256);
+  test('Pack 70000-character string', packString70000);
   test('Pack string array', packStringArray);
   test('Pack int-to-string map', packIntToStringMap);
 
@@ -94,6 +95,7 @@ void main() {
   test('Unpack 5-character string', unpackString5);
   test('Unpack 22-character string', unpackString22);
   test('Unpack 256-character string', unpackString256);
+  test('Unpack 70000-character string', unpackString70000);
   test('Unpack string array', unpackStringArray);
   test('Unpack int-to-string map', unpackIntToStringMap);
 
@@ -281,6 +283,15 @@ void packString256() {
   expect(encoded, hasLength(259));
   expect(encoded.sublist(0, 3), orderedEquals([218, 1, 0]));
   expect(encoded.sublist(3, 259), everyElement(65));
+}
+
+void packString70000() {
+  final List<int> encoded = msgPack.encode(
+    'A' * 70000,
+  );
+  expect(encoded, hasLength(70005));
+  expect(encoded.sublist(0, 5), orderedEquals([219, 0x00, 0x01, 0x11, 0x70]));
+  expect(encoded.sublist(5, 70005), everyElement(65));
 }
 
 void packBin8() {
@@ -586,6 +597,16 @@ void unpackString256() {
       'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',
     ),
   );
+}
+
+void unpackString70000() {
+  final data = Uint8List.fromList(
+    [219, 0x00, 0x01, 0x11, 0x70, ...List.filled(70000, 65)],
+  );
+  final value = msgPack.decode(data);
+  expect(value, isString);
+  expect(value, hasLength(70000));
+  expect(value, equals('A' * 70000));
 }
 
 void unpackStringArray() {

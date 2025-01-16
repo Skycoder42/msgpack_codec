@@ -21,7 +21,7 @@ extension ByteDataExtensions on ByteData {
   int getUint64Safe(int byteOffset, [Endian endian = Endian.big]) {
     final bigI = getBigUint64(byteOffset, endian);
     if (!bigI.isValidInt) {
-      throw FormatError(
+      throw MsgpackFormatException(
         'Value is too big to be serialized as a 64 bit integer',
       );
     }
@@ -31,7 +31,7 @@ extension ByteDataExtensions on ByteData {
   int getInt64Safe(int byteOffset, [Endian endian = Endian.big]) {
     final bigI = getBigInt64(byteOffset, endian);
     if (!bigI.isValidInt) {
-      throw FormatError(
+      throw MsgpackFormatException(
         'Value is too big/small to be serialized as a 64 bit integer',
       );
     }
@@ -68,7 +68,7 @@ extension ByteDataExtensions on ByteData {
     Endian endian = Endian.big,
   ]) {
     if (value.bitLength > 64) {
-      throw FormatError(
+      throw MsgpackFormatException(
         'Value is too big/small to be serialized as a 64 bit integer',
       );
     }

@@ -1,5 +1,6 @@
 // ignore_for_file: unnecessary_lambdas
 
+import 'package:dart_test_tools/test.dart';
 import 'package:msgpack_dart/src/common/msgpack_timestamp.dart';
 import 'package:test/test.dart';
 
@@ -33,7 +34,7 @@ void main() {
     });
 
     group('nanoSecondsSinceEpoch conversion', () {
-      final values = [
+      testData('converts nanoseconds to timestamp and back', [
         (BigInt.from(0), BigInt.from(0), BigInt.from(0)),
         (BigInt.from(1), BigInt.from(0), BigInt.from(1)),
         (BigInt.from(-1), BigInt.from(-1), BigInt.from(999999999)),
@@ -53,41 +54,35 @@ void main() {
           BigInt.from(-555445),
           BigInt.from(666777889)
         ),
-      ];
-
-      for (final (en, ts, tn) in values) {
-        test(
-            'converts nanoseconds ($en) to seconds ($ts) and nanoseconds ($tn) '
-            'and back', () {
-          final timestamp = MsgpackTimestamp.fromNanoSecondsSinceEpoch(en);
-          expect(timestamp.seconds, equals(ts));
-          expect(timestamp.nanoSeconds, equals(tn));
-          final restoreNanos = timestamp.nanoSecondsSinceEpoch;
-          expect(restoreNanos, en);
-        });
-      }
+      ], (fixture) {
+        final (en, ts, tn) = fixture;
+        final timestamp = MsgpackTimestamp.fromNanoSecondsSinceEpoch(en);
+        expect(timestamp.seconds, equals(ts));
+        expect(timestamp.nanoSeconds, equals(tn));
+        final restoreNanos = timestamp.nanoSecondsSinceEpoch;
+        expect(restoreNanos, en);
+      });
     });
 
     group('datetime conversion', () {
-      final values = [
-        (DateTime.utc(1970), BigInt.from(0), BigInt.from(0)),
-        (DateTime.utc(0), BigInt.from(-62167219200), BigInt.from(0)),
-        (
-          DateTime.utc(0, 1, 2, 3, 4, 5, 6, 8),
-          BigInt.from(-62167121755),
-          BigInt.from(6008000)
-        ),
-        (
-          DateTime.utc(2024, 12, 10, 16, 38, 17, 44, 55),
-          BigInt.from(1733848697),
-          BigInt.from(44055000)
-        ),
-      ];
-
-      for (final (dt, ts, tn) in values) {
-        test(
-            'converts $dt to seconds ($ts) and nanoseconds ($tn) '
-            'and back', () {
+      testData(
+        'converts DateTime to timestamp and back',
+        [
+          (DateTime.utc(1970), BigInt.from(0), BigInt.from(0)),
+          (DateTime.utc(0), BigInt.from(-62167219200), BigInt.from(0)),
+          (
+            DateTime.utc(0, 1, 2, 3, 4, 5, 6, 8),
+            BigInt.from(-62167121755),
+            BigInt.from(6008000)
+          ),
+          (
+            DateTime.utc(2024, 12, 10, 16, 38, 17, 44, 55),
+            BigInt.from(1733848697),
+            BigInt.from(44055000)
+          ),
+        ],
+        (fixture) {
+          final (dt, ts, tn) = fixture;
           final timestamp = MsgpackTimestamp.fromDateTime(dt);
           expect(timestamp.seconds, equals(ts));
           expect(timestamp.nanoSeconds, equals(tn));
@@ -98,8 +93,8 @@ void main() {
             timestamp.nanoSecondsSinceEpoch,
             BigInt.from(dt.microsecondsSinceEpoch) * BigInt.from(1000),
           );
-        });
-      }
+        },
+      );
 
       test('correctly handles timestamps with nanosecond values', () {
         final ts = MsgpackTimestamp(BigInt.one, BigInt.from(123456789));
@@ -135,5 +130,47 @@ void main() {
         );
       });
     });
+
+    testData(
+      'compareTo correctly compares timestamps',
+      [
+        (
+          MsgpackTimestamp(BigInt.from(10)),
+          MsgpackTimestamp(BigInt.from(10)),
+          0,
+        ),
+        (
+          MsgpackTimestamp(BigInt.from(10)),
+          MsgpackTimestamp(BigInt.from(20)),
+          -1,
+        ),
+        (
+          MsgpackTimestamp(BigInt.from(20)),
+          MsgpackTimestamp(BigInt.from(10)),
+          1,
+        ),
+      ],
+      (fixture) {
+        expect(fixture.$1.compareTo(fixture.$2).sign, fixture.$3);
+      },
+    );
+
+    testData(
+      'equality operator works correctly',
+      [
+        (MsgpackTimestamp.zero, MsgpackTimestamp.zero, true),
+        (MsgpackTimestamp.zero, BigInt.zero, false),
+        (MsgpackTimestamp(BigInt.one), MsgpackTimestamp(BigInt.one), true),
+        (
+          MsgpackTimestamp(BigInt.one, BigInt.one),
+          MsgpackTimestamp(BigInt.one, BigInt.two),
+          false
+        ),
+      ],
+      (fixture) {
+        expect(fixture.$1 == fixture.$2, fixture.$3);
+        expect(fixture.$1.hashCode == fixture.$2.hashCode, fixture.$3);
+      },
+    );
   });
 }

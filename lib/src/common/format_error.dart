@@ -1,8 +1,10 @@
-class FormatError implements Exception {
-  FormatError(this.message);
+// coverage:ignore-file
+
+class MsgpackFormatException implements Exception {
+  MsgpackFormatException(this.message);
 
   final String message;
 
   @override
-  String toString() => 'FormatError: $message';
+  String toString() => 'MsgpackFormatException: $message';
 }
