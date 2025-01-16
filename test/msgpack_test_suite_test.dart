@@ -11,6 +11,8 @@ import 'package:msgpack_dart/src/reader/ext_decoder.dart';
 import 'package:msgpack_dart/src/writer/ext_encoder.dart';
 import 'package:test/test.dart';
 
+part 'msgpack_test_suite_test.g.dart';
+
 @immutable
 class TestSuiteExt {
   final int id;
@@ -51,12 +53,14 @@ class TestSuiteExtDecoder implements ExtDecoder {
   TestSuiteExt decodeObject(int id, Uint8List bytes) => TestSuiteExt(id, bytes);
 }
 
-void main() {
-  final testDataFile =
-      File('test/msgpack-test-suite/dist/msgpack-test-suite.json');
-  final testDataJson = testDataFile.readAsStringSync();
-  final testData = json.decode(testDataJson) as Map<String, dynamic>;
+Future<void> main() async {
+  test(
+    'validate test data is up to date',
+    _validateUpToDate,
+    testOn: 'vm',
+  );
 
+  final testData = _loadTestData();
   for (final MapEntry(key: testSuite, value: List<dynamic> testCases)
       in testData.entries) {
     group(testSuite, () {
