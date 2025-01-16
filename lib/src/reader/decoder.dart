@@ -74,6 +74,9 @@ class _DecoderWrappingSink implements Sink<Uint8List> {
       // ignore: avoid_catching_errors
     } on RangeError {
       return false;
+      // ignore: avoid_catching_errors
+    } on ArgumentError {
+      return false;
     } finally {
       if (_offset == _buffer.length) {
         // if the buffer was fully consumed, clear it

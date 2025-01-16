@@ -73,9 +73,9 @@ void main() {
         (DateTime.utc(1970), BigInt.from(0), BigInt.from(0)),
         (DateTime.utc(0), BigInt.from(-62167219200), BigInt.from(0)),
         (
-          DateTime.utc(0, 1, 2, 3, 4, 5, 6, 7),
+          DateTime.utc(0, 1, 2, 3, 4, 5, 6, 8),
           BigInt.from(-62167121755),
-          BigInt.from(6007000)
+          BigInt.from(6008000)
         ),
         (
           DateTime.utc(2024, 12, 10, 16, 38, 17, 44, 55),

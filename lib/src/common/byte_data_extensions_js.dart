@@ -1,19 +1,12 @@
-import 'dart:js_interop';
 import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
 
 import 'format_error.dart';
 
-@JS('Number.isSafeInteger')
-external bool _isSafeInteger(int value);
-
 @internal
 extension ByteDataExtensions on ByteData {
   void setUint64Safe(int byteOffset, int value, [Endian endian = Endian.big]) {
-    if (!_isSafeInteger(value)) {
-      throw FormatError('Cannot convert unsafe integers!');
-    }
     assert(!value.isNegative, 'Use setInt64Safe for negative integers');
 
     final bigI = BigInt.from(value);
@@ -21,10 +14,6 @@ extension ByteDataExtensions on ByteData {
   }
 
   void setInt64Safe(int byteOffset, int value, [Endian endian = Endian.big]) {
-    if (!_isSafeInteger(value)) {
-      throw FormatError('Cannot convert unsafe integers!');
-    }
-
     final bigI = BigInt.from(value);
     _setBigInt64(byteOffset, bigI, endian);
   }
