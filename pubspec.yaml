@@ -1,7 +1,7 @@
-name: msgpack_dart2
+name: msgpack_codec
 description: A message pack implementation for dart that works on all platforms.
 version: 2.0.0
-homepage: https://github.com/Skycoder42/msgpack_dart
+homepage: https://github.com/Skycoder42/msgpack_codec
 
 environment:
   sdk: ^3.6.0
@@ -23,5 +23,5 @@ dart_pre_commit:
 
 cider:
   link_template:
-    tag: https://github.com/Skycoder42/msgpack_dart/releases/tag/v%tag% # initial release link template
-    diff: https://github.com/Skycoder42/msgpack_dart/compare/v%from%...v%to% # subsequent releases link template
+    tag: https://github.com/Skycoder42/msgpack_codec/releases/tag/v%tag% # initial release link template
+    diff: https://github.com/Skycoder42/msgpack_codec/compare/v%from%...v%to% # subsequent releases link template

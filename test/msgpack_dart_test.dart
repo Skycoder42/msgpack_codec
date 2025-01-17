@@ -3,9 +3,9 @@
 import 'dart:async';
 import 'dart:typed_data';
 
-import 'package:msgpack_dart2/src/codec.dart';
-import 'package:msgpack_dart2/src/common/float.dart';
-import 'package:msgpack_dart2/src/common/msgpack_timestamp.dart';
+import 'package:msgpack_codec/src/codec.dart';
+import 'package:msgpack_codec/src/common/float.dart';
+import 'package:msgpack_codec/src/common/msgpack_timestamp.dart';
 import 'package:test/test.dart';
 
 import 'test_utils.dart' if (dart.library.js_interop) 'test_utils_js.dart';

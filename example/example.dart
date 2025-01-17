@@ -2,7 +2,7 @@
 
 import 'dart:typed_data';
 
-import 'package:msgpack_dart2/msgpack_dart2.dart';
+import 'package:msgpack_codec/msgpack_codec.dart';
 
 void main(List<String> args) {
   final data = {

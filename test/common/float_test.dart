@@ -1,5 +1,5 @@
 import 'package:dart_test_tools/test.dart';
-import 'package:msgpack_dart2/src/common/float.dart';
+import 'package:msgpack_codec/src/common/float.dart';
 import 'package:test/test.dart';
 
 void main() {

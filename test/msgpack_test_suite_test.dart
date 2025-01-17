@@ -5,10 +5,10 @@ import 'dart:typed_data';
 
 import 'package:collection/collection.dart';
 import 'package:meta/meta.dart';
-import 'package:msgpack_dart2/src/codec.dart';
-import 'package:msgpack_dart2/src/common/msgpack_timestamp.dart';
-import 'package:msgpack_dart2/src/reader/ext_decoder.dart';
-import 'package:msgpack_dart2/src/writer/ext_encoder.dart';
+import 'package:msgpack_codec/src/codec.dart';
+import 'package:msgpack_codec/src/common/msgpack_timestamp.dart';
+import 'package:msgpack_codec/src/reader/ext_decoder.dart';
+import 'package:msgpack_codec/src/writer/ext_encoder.dart';
 import 'package:test/test.dart';
 
 part 'msgpack_test_suite_test.g.dart';

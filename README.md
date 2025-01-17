@@ -1,4 +1,4 @@
-# msgpack_dart
+# msgpack_codec
 
 MessagePack implementation for dart.
 

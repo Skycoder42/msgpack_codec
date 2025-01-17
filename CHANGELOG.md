@@ -29,4 +29,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## 0.0.5 - 2019-05-19
 - Changed return value from `List<int>` to `Uint8List`.
 
-[2.0.0]: https://github.com/Skycoder42/msgpack_dart/releases/tag/v2.0.0
+[2.0.0]: https://github.com/Skycoder42/msgpack_codec/releases/tag/v2.0.0
