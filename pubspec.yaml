@@ -1,6 +1,6 @@
 name: msgpack_codec
 description: A message pack implementation for dart that works on all platforms.
-version: 2.0.0
+version: 2.0.0+1
 homepage: https://github.com/Skycoder42/msgpack_codec
 
 environment:
