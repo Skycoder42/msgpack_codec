@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+import '../common/format_error.dart';
 import 'deserializer.dart';
 import 'ext_decoder.dart';
 
@@ -18,13 +19,19 @@ class MsgpackDecoder extends Converter<Uint8List, dynamic> {
 
   @override
   dynamic convert(Uint8List input) {
-    final deserializer = Deserializer(
-      input,
-      _codec,
-      extDecoder: _extDecoder,
-      copyBinaryData: copyBinaryData,
-    );
-    return deserializer.decode();
+    try {
+      final deserializer = Deserializer(
+        input,
+        _codec,
+        extDecoder: _extDecoder,
+        copyBinaryData: copyBinaryData,
+      );
+      return deserializer.decode();
+    } on MsgpackFormatException {
+      rethrow;
+    } catch (e, s) {
+      Error.throwWithStackTrace(MsgpackFormatException(e.toString()), s);
+    }
   }
 
   @override
@@ -50,7 +57,7 @@ class _DecoderWrappingSink implements Sink<Uint8List> {
   @override
   void close() {
     if (!_flush()) {
-      throw const FormatException('Invalid MsgPack data');
+      throw MsgpackFormatException('Unexpected end of input');
     }
     _sink.close();
   }
@@ -71,12 +78,16 @@ class _DecoderWrappingSink implements Sink<Uint8List> {
       }
 
       return true;
+    } on MsgpackFormatException {
+      rethrow;
       // ignore: avoid_catching_errors
     } on RangeError {
       return false;
       // ignore: avoid_catching_errors
     } on ArgumentError {
       return false;
+    } catch (e, s) {
+      Error.throwWithStackTrace(MsgpackFormatException(e.toString()), s);
     } finally {
       if (_offset == _buffer.length) {
         // if the buffer was fully consumed, clear it

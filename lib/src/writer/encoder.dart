@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+import '../common/format_error.dart';
 import 'data_writer.dart';
 import 'ext_encoder.dart';
 import 'serializer.dart';
@@ -16,12 +17,12 @@ class MsgpackEncoder extends Converter<dynamic, Uint8List> {
         _extEncoder = extEncoder;
 
   @override
-  Uint8List convert(dynamic input) {
-    final writer = ByteBufferDataWriter();
-    final serializer = Serializer(writer, _codec, _extEncoder);
-    serializer.encode(input);
-    return writer.takeBytes();
-  }
+  Uint8List convert(dynamic input) => _autoWrap(() {
+        final writer = ByteBufferDataWriter();
+        final serializer = Serializer(writer, _codec, _extEncoder);
+        serializer.encode(input);
+        return writer.takeBytes();
+      });
 
   @override
   Sink<dynamic> startChunkedConversion(Sink<Uint8List> sink) {
@@ -38,10 +39,18 @@ class _SerializerSink implements Sink<dynamic> {
   _SerializerSink(this._writer, this._serializer);
 
   @override
-  void add(dynamic data) {
-    _serializer.encode(data);
-  }
+  void add(dynamic data) => _autoWrap(() => _serializer.encode(data));
 
   @override
-  void close() => _writer.finalize();
+  void close() => _autoWrap(_writer.finalize);
+}
+
+T _autoWrap<T>(T Function() callback) {
+  try {
+    return callback();
+  } on MsgpackFormatException {
+    rethrow;
+  } catch (e, s) {
+    Error.throwWithStackTrace(MsgpackFormatException(e.toString()), s);
+  }
 }
