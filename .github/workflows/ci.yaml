@@ -11,6 +11,7 @@ jobs:
     with:
       withSubmodules: true
       unitTestPaths: test
+      minCoverage: 90
 
   cd:
     name: CD
