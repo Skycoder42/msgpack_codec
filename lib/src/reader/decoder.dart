@@ -14,8 +14,8 @@ class MsgpackDecoder extends Converter<Uint8List, dynamic> {
     Encoding codec = utf8,
     ExtDecoder? extDecoder,
     this.copyBinaryData = false,
-  })  : _codec = codec,
-        _extDecoder = extDecoder;
+  }) : _codec = codec,
+       _extDecoder = extDecoder;
 
   @override
   dynamic convert(Uint8List input) {

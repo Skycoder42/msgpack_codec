@@ -10,19 +10,17 @@ class MsgpackEncoder extends Converter<dynamic, Uint8List> {
   final Encoding _codec;
   final ExtEncoder? _extEncoder;
 
-  const MsgpackEncoder({
-    Encoding codec = utf8,
-    ExtEncoder? extEncoder,
-  })  : _codec = codec,
-        _extEncoder = extEncoder;
+  const MsgpackEncoder({Encoding codec = utf8, ExtEncoder? extEncoder})
+    : _codec = codec,
+      _extEncoder = extEncoder;
 
   @override
   Uint8List convert(dynamic input) => _autoWrap(() {
-        final writer = ByteBufferDataWriter();
-        final serializer = Serializer(writer, _codec, _extEncoder);
-        serializer.encode(input);
-        return writer.takeBytes();
-      });
+    final writer = ByteBufferDataWriter();
+    final serializer = Serializer(writer, _codec, _extEncoder);
+    serializer.encode(input);
+    return writer.takeBytes();
+  });
 
   @override
   Sink<dynamic> startChunkedConversion(Sink<Uint8List> sink) {

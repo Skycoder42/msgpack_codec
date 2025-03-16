@@ -199,10 +199,7 @@ void packUint32() {
 
 void packUint64() {
   final List<int> encoded = msgPack.encode(uint64TestValue);
-  expect(
-    encoded,
-    orderedEquals(uint64Packed),
-  );
+  expect(encoded, orderedEquals(uint64Packed));
 }
 
 void packInt8() {
@@ -286,9 +283,7 @@ void packString256() {
 }
 
 void packString70000() {
-  final List<int> encoded = msgPack.encode(
-    'A' * 70000,
-  );
+  final List<int> encoded = msgPack.encode('A' * 70000);
   expect(encoded, hasLength(70005));
   expect(encoded.sublist(0, 5), orderedEquals([219, 0x00, 0x01, 0x11, 0x70]));
   expect(encoded.sublist(5, 70005), everyElement(65));
@@ -406,31 +401,24 @@ void packTimestamp96() {
   final encoded = msgPack.encode(timestamp);
   expect(
     encoded,
-    orderedEquals(
-      [
-        // header
-        0xc7, 12, 0xFF,
-        // nanoseconds
-        0x3A, 0xDE, 0x6C, 0x99,
-        // seconds
-        0xFF, 0xFF, 0xFF, 0xFA, 0x99, 0x47, 0xF2, 0xFF,
-      ],
-    ),
+    orderedEquals([
+      // header
+      0xc7, 12, 0xFF,
+      // nanoseconds
+      0x3A, 0xDE, 0x6C, 0x99,
+      // seconds
+      0xFF, 0xFF, 0xFF, 0xFA, 0x99, 0x47, 0xF2, 0xFF,
+    ]),
   );
 }
 
 Future<void> packChunked() async {
-  final data = [
-    'this is',
-    1,
-    true,
-    'test.',
-  ];
+  final data = ['this is', 1, true, 'test.'];
 
-  final encoded = await Stream<dynamic>.fromIterable(data)
-      .transform(msgPack.encoder)
-      .expand((b) => b)
-      .toList();
+  final encoded =
+      await Stream<dynamic>.fromIterable(
+        data,
+      ).transform(msgPack.encoder).expand((b) => b).toList();
 
   expect(encoded, [
     // this is
@@ -579,9 +567,17 @@ void unpackFloat32() {
 }
 
 void unpackDouble() {
-  final data = Uint8List.fromList(
-    [0xcb, 0x40, 0x09, 0x1e, 0xb8, 0x51, 0xeb, 0x85, 0x1f],
-  );
+  final data = Uint8List.fromList([
+    0xcb,
+    0x40,
+    0x09,
+    0x1e,
+    0xb8,
+    0x51,
+    0xeb,
+    0x85,
+    0x1f,
+  ]);
   final value = msgPack.decode(data);
   expect(value, equals(3.14));
 }
@@ -600,9 +596,14 @@ void unpackString256() {
 }
 
 void unpackString70000() {
-  final data = Uint8List.fromList(
-    [219, 0x00, 0x01, 0x11, 0x70, ...List.filled(70000, 65)],
-  );
+  final data = Uint8List.fromList([
+    219,
+    0x00,
+    0x01,
+    0x11,
+    0x70,
+    ...List.filled(70000, 65),
+  ]);
   final value = msgPack.decode(data);
   expect(value, isString);
   expect(value, hasLength(70000));
@@ -633,9 +634,19 @@ void unpackStringArray() {
 }
 
 void unpackIntToStringMap() {
-  final data = Uint8List.fromList(
-    [130, 1, 163, 111, 110, 101, 2, 163, 116, 119, 111],
-  );
+  final data = Uint8List.fromList([
+    130,
+    1,
+    163,
+    111,
+    110,
+    101,
+    2,
+    163,
+    116,
+    119,
+    111,
+  ]);
   final value = msgPack.decode(data);
   expect(value, isMap);
   value as Map;
@@ -710,15 +721,10 @@ Future<void> unpackChunked() async {
     [0x74, 0x65], [0x73, 0x74, 0x2e],
   ];
 
-  final decoded = await Stream.fromIterable(data)
-      .map(Uint8List.fromList)
-      .transform(msgPack.decoder)
-      .toList();
+  final decoded =
+      await Stream.fromIterable(
+        data,
+      ).map(Uint8List.fromList).transform(msgPack.decoder).toList();
 
-  expect(decoded, [
-    'this is',
-    1,
-    true,
-    'test.',
-  ]);
+  expect(decoded, ['this is', 1, true, 'test.']);
 }

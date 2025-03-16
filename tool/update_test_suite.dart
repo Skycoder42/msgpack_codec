@@ -2,8 +2,9 @@ import 'dart:convert';
 import 'dart:io';
 
 Future<void> main(List<String> args) async {
-  final testDataFile =
-      File('test/msgpack-test-suite/dist/msgpack-test-suite.json');
+  final testDataFile = File(
+    'test/msgpack-test-suite/dist/msgpack-test-suite.json',
+  );
   final testDataJson = await testDataFile.readAsString();
   final condensedJson = json.encode(json.decode(testDataJson));
 

@@ -34,34 +34,38 @@ void main() {
     });
 
     group('nanoSecondsSinceEpoch conversion', () {
-      testData('converts nanoseconds to timestamp and back', [
-        (BigInt.from(0), BigInt.from(0), BigInt.from(0)),
-        (BigInt.from(1), BigInt.from(0), BigInt.from(1)),
-        (BigInt.from(-1), BigInt.from(-1), BigInt.from(999999999)),
-        (BigInt.from(999999999), BigInt.from(0), BigInt.from(999999999)),
-        (BigInt.from(-999999999), BigInt.from(-1), BigInt.from(1)),
-        (BigInt.from(1000000000), BigInt.from(1), BigInt.from(0)),
-        (BigInt.from(-1000000000), BigInt.from(-1), BigInt.from(0)),
-        (BigInt.from(1000000001), BigInt.from(1), BigInt.from(1)),
-        (BigInt.from(-1000000001), BigInt.from(-2), BigInt.from(999999999)),
-        (
-          BigInt.from(555444333222111),
-          BigInt.from(555444),
-          BigInt.from(333222111)
-        ),
-        (
-          BigInt.from(-555444333222111),
-          BigInt.from(-555445),
-          BigInt.from(666777889)
-        ),
-      ], (fixture) {
-        final (en, ts, tn) = fixture;
-        final timestamp = MsgpackTimestamp.fromNanoSecondsSinceEpoch(en);
-        expect(timestamp.seconds, equals(ts));
-        expect(timestamp.nanoSeconds, equals(tn));
-        final restoreNanos = timestamp.nanoSecondsSinceEpoch;
-        expect(restoreNanos, en);
-      });
+      testData(
+        'converts nanoseconds to timestamp and back',
+        [
+          (BigInt.from(0), BigInt.from(0), BigInt.from(0)),
+          (BigInt.from(1), BigInt.from(0), BigInt.from(1)),
+          (BigInt.from(-1), BigInt.from(-1), BigInt.from(999999999)),
+          (BigInt.from(999999999), BigInt.from(0), BigInt.from(999999999)),
+          (BigInt.from(-999999999), BigInt.from(-1), BigInt.from(1)),
+          (BigInt.from(1000000000), BigInt.from(1), BigInt.from(0)),
+          (BigInt.from(-1000000000), BigInt.from(-1), BigInt.from(0)),
+          (BigInt.from(1000000001), BigInt.from(1), BigInt.from(1)),
+          (BigInt.from(-1000000001), BigInt.from(-2), BigInt.from(999999999)),
+          (
+            BigInt.from(555444333222111),
+            BigInt.from(555444),
+            BigInt.from(333222111),
+          ),
+          (
+            BigInt.from(-555444333222111),
+            BigInt.from(-555445),
+            BigInt.from(666777889),
+          ),
+        ],
+        (fixture) {
+          final (en, ts, tn) = fixture;
+          final timestamp = MsgpackTimestamp.fromNanoSecondsSinceEpoch(en);
+          expect(timestamp.seconds, equals(ts));
+          expect(timestamp.nanoSeconds, equals(tn));
+          final restoreNanos = timestamp.nanoSecondsSinceEpoch;
+          expect(restoreNanos, en);
+        },
+      );
     });
 
     group('datetime conversion', () {
@@ -73,12 +77,12 @@ void main() {
           (
             DateTime.utc(0, 1, 2, 3, 4, 5, 6, 8),
             BigInt.from(-62167121755),
-            BigInt.from(6008000)
+            BigInt.from(6008000),
           ),
           (
             DateTime.utc(2024, 12, 10, 16, 38, 17, 44, 55),
             BigInt.from(1733848697),
-            BigInt.from(44055000)
+            BigInt.from(44055000),
           ),
         ],
         (fixture) {
@@ -114,20 +118,14 @@ void main() {
           () => tsPos.toDateTime(),
           throwsA(isA<TimestampTruncatedException>()),
         );
-        expect(
-          tsPos.toDateTime(truncate: true),
-          DateTime.utc(275760, 9, 13),
-        );
+        expect(tsPos.toDateTime(truncate: true), DateTime.utc(275760, 9, 13));
 
         final tsNeg = MsgpackTimestamp(-BigInt.one << 63);
         expect(
           () => tsNeg.toDateTime(),
           throwsA(isA<TimestampTruncatedException>()),
         );
-        expect(
-          tsNeg.toDateTime(truncate: true),
-          DateTime.utc(-271821, 4, 20),
-        );
+        expect(tsNeg.toDateTime(truncate: true), DateTime.utc(-271821, 4, 20));
       });
     });
 
@@ -164,7 +162,7 @@ void main() {
         (
           MsgpackTimestamp(BigInt.one, BigInt.one),
           MsgpackTimestamp(BigInt.one, BigInt.two),
-          false
+          false,
         ),
       ],
       (fixture) {

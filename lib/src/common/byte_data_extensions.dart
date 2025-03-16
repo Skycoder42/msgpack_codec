@@ -43,11 +43,7 @@ extension ByteDataExtensions on ByteData {
     );
   }
 
-  void setBigInt64(
-    int byteOffset,
-    BigInt value, [
-    Endian endian = Endian.big,
-  ]) {
+  void setBigInt64(int byteOffset, BigInt value, [Endian endian = Endian.big]) {
     if (!value.isValidInt) {
       throw MsgpackFormatException(
         'Value is too big/small to be serialized as a 64 bit integer',

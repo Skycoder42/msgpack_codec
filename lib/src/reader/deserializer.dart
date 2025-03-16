@@ -23,9 +23,9 @@ class Deserializer {
     ExtDecoder? extDecoder,
     this.copyBinaryData = false,
     int initialOffset = 0,
-  })  : _data = ByteData.view(_list.buffer, _list.offsetInBytes),
-        _extDecoder = extDecoder,
-        _offset = initialOffset;
+  }) : _data = ByteData.view(_list.buffer, _list.offsetInBytes),
+       _extDecoder = extDecoder,
+       _offset = initialOffset;
 
   /// If false, decoded binary data buffers will reference underlying input
   /// buffer and thus may change when the content of input buffer changes.
@@ -183,8 +183,11 @@ class Deserializer {
   }
 
   Uint8List _readBuffer(int length) {
-    final res =
-        Uint8List.view(_list.buffer, _list.offsetInBytes + _offset, length);
+    final res = Uint8List.view(
+      _list.buffer,
+      _list.offsetInBytes + _offset,
+      length,
+    );
     _offset += length;
     return copyBinaryData ? Uint8List.fromList(res) : res;
   }
@@ -219,9 +222,9 @@ class Deserializer {
   }
 
   dynamic _readExt(int length) => switch (_readUInt8()) {
-        0xFF => _readTimestamp(length),
-        final extType => _readCustomExt(extType, length),
-      };
+    0xFF => _readTimestamp(length),
+    final extType => _readCustomExt(extType, length),
+  };
 
   MsgpackTimestamp _readTimestamp(int length) {
     switch (length) {

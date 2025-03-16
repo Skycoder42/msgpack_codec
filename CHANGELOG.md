@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.2] - 2025-03-16
+### Changed
+- Updated dependencies
+- Updated min dart sdk to 3.7.0
+
 ## [2.0.1] - 2025-01-30
 ### Changed
 - Improved exception handling
@@ -39,6 +44,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## 0.0.5 - 2019-05-19
 - Changed return value from `List<int>` to `Uint8List`.
 
+[2.0.2]: https://github.com/Skycoder42/msgpack_codec/compare/v2.0.1...v2.0.2
 [2.0.1]: https://github.com/Skycoder42/msgpack_codec/compare/v2.0.0+1...v2.0.1
 [2.0.0+1]: https://github.com/Skycoder42/msgpack_codec/compare/v2.0.0...v2.0.0+1
 [2.0.0]: https://github.com/Skycoder42/msgpack_codec/releases/tag/v2.0.0

@@ -17,9 +17,9 @@ class MsgpackCodec extends Codec<dynamic, Uint8List> {
     ExtEncoder? extEncoder,
     ExtDecoder? extDecoder,
     this.copyBinaryData = false,
-  })  : _codec = codec,
-        _extEncoder = extEncoder,
-        _extDecoder = extDecoder;
+  }) : _codec = codec,
+       _extEncoder = extEncoder,
+       _extDecoder = extDecoder;
 
   @override
   Converter<dynamic, Uint8List> get encoder =>
@@ -27,10 +27,10 @@ class MsgpackCodec extends Codec<dynamic, Uint8List> {
 
   @override
   Converter<Uint8List, dynamic> get decoder => MsgpackDecoder(
-        codec: _codec,
-        extDecoder: _extDecoder,
-        copyBinaryData: copyBinaryData,
-      );
+    codec: _codec,
+    extDecoder: _extDecoder,
+    copyBinaryData: copyBinaryData,
+  );
 }
 
 const msgPack = MsgpackCodec();

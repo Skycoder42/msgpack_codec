@@ -101,11 +101,7 @@ abstract base class DataWriterBase {
       // would have added _scratchBuffer to _builder and _scratchOffset would
       // be 0
       if (bytes is Uint8List) {
-        _scratchBuffer?.setRange(
-          scratchOffset,
-          scratchOffset + length,
-          bytes,
-        );
+        _scratchBuffer?.setRange(scratchOffset, scratchOffset + length, bytes);
       } else {
         for (var i = 0; i < length; i++) {
           _scratchBuffer?[scratchOffset + i] = bytes[i];
@@ -119,8 +115,10 @@ abstract base class DataWriterBase {
     if (_scratchBuffer == null) {
       // start with small scratch buffer, expand to regular later if needed
       _scratchBuffer = Uint8List(_kScratchSizeInitial);
-      scratchData =
-          ByteData.view(_scratchBuffer!.buffer, _scratchBuffer!.offsetInBytes);
+      scratchData = ByteData.view(
+        _scratchBuffer!.buffer,
+        _scratchBuffer!.offsetInBytes,
+      );
     }
     final remaining = _scratchBuffer!.length - scratchOffset;
     if (remaining < size) {

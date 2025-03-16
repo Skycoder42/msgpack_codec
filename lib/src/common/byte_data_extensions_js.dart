@@ -43,16 +43,14 @@ extension ByteDataExtensions on ByteData {
     int byteOffset,
     BigInt value, [
     Endian endian = Endian.big,
-  ]) =>
-      _setBigInt64(byteOffset, value, endian);
+  ]) => _setBigInt64(byteOffset, value, endian);
 
   @pragma('vm:prefer-inline')
   void setBigInt64(
     int byteOffset,
     BigInt value, [
     Endian endian = Endian.big,
-  ]) =>
-      _setBigInt64(byteOffset, value, endian);
+  ]) => _setBigInt64(byteOffset, value, endian);
 
   @pragma('vm:prefer-inline')
   BigInt getBigUint64(int byteOffset, [Endian endian = Endian.big]) =>

@@ -1,3 +1,5 @@
+// ignore_for_file: discarded_futures
+
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
@@ -38,9 +40,9 @@ class TestSuiteExtEncoder implements ExtEncoder {
 
   @override
   int? extTypeForObject(dynamic object) => switch (object) {
-        TestSuiteExt(:final id) => id,
-        _ => null,
-      };
+    TestSuiteExt(:final id) => id,
+    _ => null,
+  };
 
   @override
   Uint8List encodeObject(covariant TestSuiteExt object) => object.bytes;
@@ -54,11 +56,7 @@ class TestSuiteExtDecoder implements ExtDecoder {
 }
 
 Future<void> main() async {
-  test(
-    'validate test data is up to date',
-    _validateUpToDate,
-    testOn: 'vm',
-  );
+  test('validate test data is up to date', _validateUpToDate, testOn: 'vm');
 
   final testData = _loadTestData();
   for (final MapEntry(key: testSuite, value: List<dynamic> testCases)
@@ -79,9 +77,10 @@ Future<void> main() async {
             _testValue(
               bigInt.isValidInt ? bigInt.toInt() : bigInt,
               msgpack,
-              skip: bigInt.isValidInt
-                  ? null
-                  : '$bigInt cannot be converted to int',
+              skip:
+                  bigInt.isValidInt
+                      ? null
+                      : '$bigInt cannot be converted to int',
             );
           case {'number': final num value}:
             _testValue(value, msgpack);
@@ -98,10 +97,7 @@ Future<void> main() async {
             );
             _testValue(timestamp, msgpack);
           case {'ext': [final int id, final String bytes]}:
-            _testValue(
-              TestSuiteExt(id, _hexToBytes(bytes)),
-              msgpack,
-            );
+            _testValue(TestSuiteExt(id, _hexToBytes(bytes)), msgpack);
           default:
             throw UnimplementedError('Unknown test case: $testCase');
         }
@@ -123,28 +119,20 @@ void _testValue(dynamic value, List<String> msgpack, {Object? skip}) {
 }
 
 void _testEncode(dynamic value, List<String> msgpack, {Object? skip}) {
-  test(
-    'serializes $value to any of $msgpack',
-    skip: skip,
-    () {
-      final encoded = _testCodec.encode(value);
-      expect(encoded, _hexEqualsAny(msgpack));
-    },
-  );
+  test('serializes $value to any of $msgpack', skip: skip, () {
+    final encoded = _testCodec.encode(value);
+    expect(encoded, _hexEqualsAny(msgpack));
+  });
 }
 
 void _testEncodeChunked(dynamic value, List<String> msgpack, {Object? skip}) {
-  test(
-    'serializes $value to any of $msgpack (chunked)',
-    skip: skip,
-    () async {
-      final encoded = Stream.value(value)
-          .transform(_testCodec.encoder)
-          .expand((chunk) => chunk)
-          .toList();
-      expect(encoded, completion(_hexEqualsAny(msgpack)));
-    },
-  );
+  test('serializes $value to any of $msgpack (chunked)', skip: skip, () {
+    final encoded =
+        Stream.value(
+          value,
+        ).transform(_testCodec.encoder).expand((chunk) => chunk).toList();
+    expect(encoded, completion(_hexEqualsAny(msgpack)));
+  });
 }
 
 void _testDecode(dynamic value, List<String> msgpack, {Object? skip}) {
@@ -181,21 +169,21 @@ void _testDecodeChunked(dynamic value, List<String> msgpack, {Object? skip}) {
   });
 }
 
-Matcher _hexEqualsAny(Iterable<String> hexRepresentations) => _AnyOf(
-      hexRepresentations.map(_hexEquals).toList(),
-    );
+Matcher _hexEqualsAny(Iterable<String> hexRepresentations) =>
+    _AnyOf(hexRepresentations.map(_hexEquals).toList());
 
 Matcher _hexEquals(String hexRepresentation) =>
     orderedEquals(_hexToBytes(hexRepresentation));
 
-Uint8List _hexToBytes(String hexRepresentation) => hexRepresentation.isEmpty
-    ? Uint8List(0)
-    : Uint8List.fromList(
-        hexRepresentation
-            .split('-')
-            .map((byte) => int.parse(byte, radix: 16))
-            .toList(),
-      );
+Uint8List _hexToBytes(String hexRepresentation) =>
+    hexRepresentation.isEmpty
+        ? Uint8List(0)
+        : Uint8List.fromList(
+          hexRepresentation
+              .split('-')
+              .map((byte) => int.parse(byte, radix: 16))
+              .toList(),
+        );
 
 class _AnyOf extends Matcher {
   final List<Matcher> _matchers;
