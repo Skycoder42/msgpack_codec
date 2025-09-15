@@ -12,7 +12,7 @@ dependencies:
 dev_dependencies:
   collection: ^1.19.1
   custom_lint: ^0.7.5
-  dart_pre_commit: ^5.4.4
+  dart_pre_commit: ">=5.4.4 <7.0.0"
   dart_test_tools: ^6.1.1
   test: ^1.25.15
 
